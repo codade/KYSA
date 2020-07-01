@@ -33,7 +33,7 @@ class Main_Window():
         self.windowHeight = self.start_window.winfo_reqheight()
 
 
-        iconFile='Icon_start3.ico'
+        iconFile='KYSA-Icon_64.ico'
         if not hasattr(sys, "frozen"):
             iconFile = os.path.join(os.getcwd(), iconFile)
         else:
@@ -142,6 +142,9 @@ class Main_Window():
 
         infobox.geometry(f"360x380+{positionRight_info}+{positionDown_info}")
         infobox.title("Über KYSA")
+
+        raw_copycode=Image.open(os.path.join(os.getcwd(),'Base_Functions','Copyrightcode.png')).resize((120,29), Image.ANTIALIAS)
+        copycode=ImageTk.PhotoImage(raw_copycode)
         
         banks="\t-------------------------------\n".expandtabs(2)\
         +"\tAktuell unterstützte Banken:\n\n".expandtabs(3)\
@@ -160,6 +163,8 @@ class Main_Window():
         l_version=tk.Label(infobox, text="Version:\tv1.1",bg='white',font='OpenSans  9')
         l_banks=tk.Label(infobox, text=banks,justify='left',bg='white',font='OpenSans 11')
         l_credit=tk.Label(infobox, text="© Daniel Krezdorn 2020",bg='white',font='OpenSans  9')
+        l_copyright=tk.Label(infobox, image=copycode)
+        l_copyright.image=copycode
         
         l_title.pack(pady=20,fill='x',expand=True)
         l_banks.pack(pady=10,fill='x',expand=True)
