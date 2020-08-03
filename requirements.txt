@@ -1,8 +1,8 @@
-matplotlib==3.2.2
-numpy==1.19.0
-openpyxl==3.0.4
-pandas==1.0.5
-Pillow==7.0.0
-regex==2020.6.8
-seaborn==0.10.1
-tkfilebrowser==2.3.2
+matplotlib>=3.2.2
+numpy>=1.19.0
+openpyxl>=3.0.4
+pandas>=1.0.5
+Pillow>=7.0.0
+regex>=2020.6.8
+seaborn>=0.10.1
+tkfilebrowser>=2.3.2
