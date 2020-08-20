@@ -37,7 +37,7 @@ def make_accinfo_dict():
 
     comd_giro_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungstext","Umsatz in EUR"],('no',[]),('no',[],[]),'giro',('yes','Bargeld','Bargeld\nComdirect'),['a','o'])
 
-    comd_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'giro',('no',"",""),['c','m','v'])
+    comd_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'credit',('no',"",""),['c','m','v'])
 
     dkb_giro_info=(['Buchungstag', 'Wertstellung', 'Buchungstext','Auftraggeber/Begünstigter', 'Verwendungszweck', 'Kontonummer', 'BLZ', 'Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz'],('yes',[3,4,5]),('yes',[3,4,5,6,8,9,10],[0,1,2,4,3]),'giro',('yes','Kosten Lebens-\nhaltung','Einzahlungen'),['a','o'])
 

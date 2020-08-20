@@ -9,15 +9,19 @@ import sys
 import tkinter as tk
 from tkinter import messagebox
 import tkfilebrowser as tkbrowse
+from PIL import ImageTk, Image
 
 #check which os is running and adjust folder structure
 if platform.system()=='Windows':
     homefolder=os.path.expanduser(os.getenv('USERPROFILE'))
-    folder_sep='\\'
-
+    padx_os=10
+    
 else:
-    folder_sep='/'
+    padx_os=7
     homefolder='~/'
+    
+    
+    
 
 
 
@@ -32,15 +36,21 @@ class Main_Window():
         self.windowWidth = self.start_window.winfo_reqwidth()
         self.windowHeight = self.start_window.winfo_reqheight()
 
+        iconFile_name='Icon_start4.ico' # Icon Name
 
-        iconFile='KYSA-Icon_64.ico'
+
         if not hasattr(sys, "frozen"):
-            iconFile = os.path.join(os.getcwd(), iconFile)
+            iconFile = os.path.join(os.getcwd(), iconFile_name)
         else:
-            iconFile = os.path.join(sys.prefix, iconFile)
+            iconFile = os.path.join(sys.prefix, iconFile_name)
         
-        self.start_window.iconbitmap(default=self.resource_path(iconFile))
- 
+        if platform.system()=='Windows':
+            self.start_window.iconbitmap(default=self.resource_path(iconFile))
+        else:
+            linux_img = ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), iconFile_name)))
+            self.start_window.iconphoto(True, linux_img)
+
+
         # Gets both half the screen width/height and window width/height
         positionRight_main = int(self.start_window.winfo_screenwidth()/3 - self.windowWidth/4)
         positionDown_main = int(self.start_window.winfo_screenheight()/3 - self.windowHeight/4)
@@ -49,10 +59,7 @@ class Main_Window():
         self.start_window.geometry(f"+{positionRight_main}+{positionDown_main}")
 
 
-
-
-
-
+        
         #self.start_window.geometry("+400+250")
 
         self.start_window.protocol("WM_DELETE_WINDOW",self.close_program)
@@ -87,8 +94,8 @@ class Main_Window():
         
         #create radiobutton for csv/excel choice
         tk.Label(self.start_window, text="Sollen *.csv oder *.xlsx Daten eingelesen werden",justify='left',wraplength=240,pady=10,font='Helvetica 12').grid(rowspan=2,column=0,padx=5, sticky='W')
-        tk.Radiobutton(self.start_window, text='csv',variable=self.importtype_var,value='csv_analyse',command=self.set_checkboxes, font='Helvetica  11',padx=8).grid(row=0,column=1, sticky='W')
-        tk.Radiobutton(self.start_window, text='xlsx',variable=self.importtype_var,value='xls_analyse',command=self.set_checkboxes,font='Helvetica  11',padx=8).grid(row=1,column=1, sticky='W')
+        tk.Radiobutton(self.start_window, text='csv',variable=self.importtype_var,value='csv_analyse',command=self.set_checkboxes, font='Helvetica  11',padx=padx_os).grid(row=0,column=1, sticky='W')
+        tk.Radiobutton(self.start_window, text='xlsx',variable=self.importtype_var,value='xls_analyse',command=self.set_checkboxes,font='Helvetica  11',padx=padx_os).grid(row=1,column=1, sticky='W')
 
         #create checkbox for holiday extraction
         tk.Label(self.start_window, text="Urlaube separat auswerten",wraplength=240,pady=10,font='Helvetica 12').grid(row=2,column=0,padx=5, sticky='W')
@@ -140,11 +147,12 @@ class Main_Window():
         positionRight_info=int(self.start_window.winfo_screenwidth()/2- self.windowWidth/3)
         positionDown_info=int(self.start_window.winfo_screenheight()/3 - self.windowHeight)
 
-        infobox.geometry(f"360x380+{positionRight_info}+{positionDown_info}")
+        infobox.geometry(f"360x450+{positionRight_info}+{positionDown_info}")
         infobox.title("Über KYSA")
 
         raw_copycode=Image.open(os.path.join(os.getcwd(),'Base_Functions','Copyrightcode.png')).resize((120,29), Image.ANTIALIAS)
         copycode=ImageTk.PhotoImage(raw_copycode)
+
         
         banks="\t-------------------------------\n".expandtabs(2)\
         +"\tAktuell unterstützte Banken:\n\n".expandtabs(3)\
@@ -162,7 +170,7 @@ class Main_Window():
         l_title =tk.Label(infobox, text="KYSA\n-\nKnow Your Spendings Application", bg='white',font='Helvetica 15')
         l_version=tk.Label(infobox, text="Version:\tv1.1",bg='white',font='OpenSans  9')
         l_banks=tk.Label(infobox, text=banks,justify='left',bg='white',font='OpenSans 11')
-        l_credit=tk.Label(infobox, text="© Daniel Krezdorn 2020",bg='white',font='OpenSans  9')
+        l_credit=tk.Label(infobox, text="Daniel Krezdorn 2020",bg='white',font='OpenSans  9')
         l_copyright=tk.Label(infobox, image=copycode)
         l_copyright.image=copycode
         
@@ -170,6 +178,7 @@ class Main_Window():
         l_banks.pack(pady=10,fill='x',expand=True)
         l_version.pack(pady=5,fill='x',expand=True)
         l_credit.pack(pady=5,fill='x',expand=True)
+        l_copyright.pack(pady=3,expand=True)
 
 
     #create function to adjust values based on importtype decision
@@ -425,7 +434,7 @@ class Longtermimport_Window():
         while userchoice:
             self.browse_file()
             if self.filenames==[]:
-                if tk.messagebox.askokcancel(message='Wenn Sie abbrechen, wird der Schritt der Datei-Zusammenführung für Langzeitanalysen übersprungen. Möchten Sie dennoch fortfahren?'):
+                if tk.messagebox.askyesno(message='Wenn Sie abbrechen, wird der Schritt der Datei-Zusammenführung für Langzeitanalysen übersprungen. Möchten Sie dennoch fortfahren?'):
                     break
                 else:
                     continue
