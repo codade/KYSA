@@ -99,6 +99,6 @@ if not main_select=='close_program':
     plot_data.makeplotdata()
     #Create Plots and save 'jpgs'
     plot_data.plotdata()
-    guib.process_info(f'Die Datenauswertung ist jetzt abgeschlossen, die Ergebnisse wurden in folgendem Ordner abgelegt:\n\n{accounts_data.folder_raw}Ergebnisse\n\n Das Programm wird jetzt geschlossen werden.')
+    guib.process_info(f'Die Datenauswertung ist jetzt abgeschlossen, die Ergebnisse wurden in folgendem Ordner abgelegt:\n\n{accounts_data.folder_raw}Ergebnisse\n\nDas Programm wird jetzt geschlossen werden.')
 
    
