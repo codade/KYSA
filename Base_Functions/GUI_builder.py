@@ -37,7 +37,7 @@ class Main_Window():
         self.windowWidth = self.start_window.winfo_reqwidth()
         self.windowHeight = self.start_window.winfo_reqheight()
 
-        iconFile_name='KYSA-Icon2.ico' # Icon Name
+        iconFile_name='KYSA-Icon_64.ico' # Icon Name
 
 
         if not hasattr(sys, "frozen"):
