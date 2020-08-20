@@ -127,6 +127,7 @@ class Accounts_Data:
             self.basis_data[filename].columns=["time1","time2","act","text","val",'month','cat']
             
             #add info for subsequent handling
+            self.plotting_list[filename]=[]
             self.imported_files.append(filename)
             self.folder_res[filename]=self.folder_raw+'Ergebnisse'+self.folder_sep+filename
 
@@ -243,7 +244,7 @@ class Accounts_Data:
                     os.makedirs(result_dir)
             except OSError:
                 print ('Error: Creating directory. ' +  result_dir)
-            writer_excel = pd.ExcelWriter(result_dir+self.folder_sep+folder_list[item]+'_Auswertung.xlsx', engine='xlsxwriter',datetime_format="dd.mm.yyyy")
+            writer_excel = pd.ExcelWriter(result_dir+self.folder_sep+folder_list[item]+'_Auswertung.xlsx', engine='openpyxl',datetime_format="dd.mm.yyyy")
 
             if folder_list[item] in self.raw_data:
                 self.raw_data[folder_list[item]].to_excel(writer_excel,sheet_name='Rohdaten',index=False,header=self.raw_data_header[folder_list[item]])

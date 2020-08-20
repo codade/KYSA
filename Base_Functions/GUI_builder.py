@@ -4,12 +4,13 @@
 from Base_Functions import data_processor
 
 import os
+from PIL import ImageTk, Image
 import platform
 import sys
 import tkinter as tk
 from tkinter import messagebox
 import tkfilebrowser as tkbrowse
-from PIL import ImageTk, Image
+import webbrowser
 
 #check which os is running and adjust folder structure
 if platform.system()=='Windows':
@@ -36,7 +37,7 @@ class Main_Window():
         self.windowWidth = self.start_window.winfo_reqwidth()
         self.windowHeight = self.start_window.winfo_reqheight()
 
-        iconFile_name='KYSA-Icon_64.ico' # Icon Name
+        iconFile_name='KYSA-Icon2.ico' # Icon Name
 
 
         if not hasattr(sys, "frozen"):
@@ -83,6 +84,7 @@ class Main_Window():
         menu_container = tk.Menu(self.start_window)
         start_menu = tk.Menu(menu_container, tearoff=0)# Start Menu
         # Order menu entries (Info & quit)
+        start_menu.add_command(label="Dokumentation", command=self.show_readme)
         start_menu.add_command(label="Info", command=self.action_get_info_dialog)
         start_menu.add_separator() # Fügt eine Trennlinie hinzu
         start_menu.add_command(label="Beenden", command=self.close_program)
@@ -124,6 +126,7 @@ class Main_Window():
         
         self.start_window.mainloop()
 
+    #necessary for icon integration in windows systems
     def resource_path(self,relative_path):    
         try:       
             base_path = sys._MEIPASS
@@ -132,12 +135,24 @@ class Main_Window():
 
         return os.path.join(base_path, relative_path)
 
-
-        
+    #stop gui and scripzt if window is closed by user
     def close_program(self):
         self.importtype_var.set('close_program')
         self.start_window.destroy()
     
+    #open readmefile
+    def show_readme(self):
+
+        readme_name='KYSA_Readme.html'
+        
+        if not hasattr(sys, "frozen"):
+            readme_path = os.path.join(os.getcwd(), readme_name)
+        else:
+            readme_path = os.path.join(sys.prefix, readme_name)
+
+        webbrowser.open('file://'+readme_path,new=1)
+
+        
     #create info menu message
     def action_get_info_dialog(self):
         
@@ -150,11 +165,18 @@ class Main_Window():
         infobox.geometry(f"360x450+{positionRight_info}+{positionDown_info}")
         infobox.title("Über KYSA")
 
-        raw_copycode=Image.open(os.path.join(os.getcwd(),'Base_Functions','Copyrightcode.png')).resize((120,29), Image.ANTIALIAS)
+        copycode='Copyrightcode.png'
+        
+        if not hasattr(sys, "frozen"):
+            path_copycode = os.path.join(os.getcwd(),copycode)
+        else:
+            path_copycode = os.path.join(sys.prefix,copycode) 
+
+        raw_copycode=Image.open(path_copycode).resize((120,29), Image.ANTIALIAS)
         copycode=ImageTk.PhotoImage(raw_copycode)
 
         
-        banks="\t-------------------------------\n".expandtabs(2)\
+        banks="\t-------------------------------------\n".expandtabs(2)\
         +"\tAktuell unterstützte Banken:\n\n".expandtabs(3)\
         +"\t1) Apobank (Giro)\n".expandtabs(5)\
         +"\t2) comdirect (Giro&Kredit)\n".expandtabs(5)\
@@ -164,11 +186,11 @@ class Main_Window():
         +"\t6) MLP Bank (Giro)\n".expandtabs(5)\
         +"\t7) Sparkasse (Giro)\n".expandtabs(5)\
         +"\t8) Triodos Bank (Giro)\n".expandtabs(5)\
-        +"\t-------------------------------".expandtabs(2)
+        +"\t-------------------------------------".expandtabs(2)
         
         
         l_title =tk.Label(infobox, text="KYSA\n-\nKnow Your Spendings Application", bg='white',font='Helvetica 15')
-        l_version=tk.Label(infobox, text="Version:\tv1.1",bg='white',font='OpenSans  9')
+        l_version=tk.Label(infobox, text="Version:\tv1.02",bg='white',font='OpenSans  9')
         l_banks=tk.Label(infobox, text=banks,justify='left',bg='white',font='OpenSans 11')
         l_credit=tk.Label(infobox, text="Daniel Krezdorn 2020",bg='white',font='OpenSans  9')
         l_copyright=tk.Label(infobox, image=copycode)
@@ -202,7 +224,7 @@ class Main_Window():
     #create file browsing function
     def browse_file(self):
         if (self.infocounter==0)&(self.importtype_var.get()=='xls_analyse'):
-            tk.messagebox.showinfo(message='\nEs können mehrere Dateien auf einmal ausgewählt werden!\n\n\nBitte beachten:\n\nExcel-Dateien, die ausgewertet werden sollen, müssen ein Tabellenblatt "Aufbereitete Daten" in der Formatierung bereits aufbereiteter csv_Dateien haben!\n')
+            tk.messagebox.showinfo(message='\nEs können mehrere Dateien auf einmal ausgewählt werden!\n\n\nBitte beachten:\n\nExcel-Dateien, die ausgewertet werden sollen, müssen ein Tabellenblatt "Aufbereitete Daten" in der Formatierung bereits aufbereiteter csv-Dateien haben!\n')
             self.infocounter+=1
         elif (self.infocounter==0):
             tk.messagebox.showinfo(message='\nBitte wählen Sie alle auszuwertenden Dateien auf einmal aus!')

@@ -7,8 +7,8 @@ import pandas as pd
 import datetime
 import re
 
-dict_giro=pd.read_excel('Zuordnungstabelle.xlsx',sheet_name='Girokonto',index_col=0)['Kategorie'].to_dict()
-dict_credit=pd.read_excel('Zuordnungstabelle.xlsx',sheet_name='Kreditkarte',index_col=0)['Kategorie'].to_dict()
+dict_giro=pd.read_excel('Zuordnungstabelle.xlsx',engine='openpyxl',sheet_name='Girokonto',index_col=0)['Kategorie'].to_dict()
+dict_credit=pd.read_excel('Zuordnungstabelle.xlsx',engine='openpyxl',sheet_name='Kreditkarte',index_col=0)['Kategorie'].to_dict()
 
 ## data categorizer. dictionaries are used to get keys to search for and corresponding categories
 def categorizer(dicttype,string):

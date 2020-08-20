@@ -47,12 +47,11 @@ class Plotters:
             ##create dataframe containing all income categories:
             total_income=self.cat_data[element_name][(self.cat_data[element_name]['cat'].str.contains('Urlaub|Gesamtsaldo|Sonstiges')==False)&(self.cat_data[element_name]['val']>0)].copy()
             
-            #NEW auto-adjust plottypes, if total income is empty
            
             ##adjust plot_data if savecent was selected
             if element_name=='Sparcents':
-                self.plotinfo_costs[element_name]=[(self.cat_data[element_name],f'Übersicht über die Herkunft und Summe der "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Übersicht Sparcents.jpg')]
-                self.plotinfo_month[element_name]=(f'Aufstellung der "{element_name}" nach Monaten',self.folder_res[element_name]+self.folder_sep+'Monatliche Sparcents.jpg')
+                self.plotinfo_costs[element_name]=[(self.cat_data[element_name],f'Übersicht über die Herkunft und Summe der "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Übersicht Sparcents.png')]
+                self.plotinfo_month[element_name]=(f'Aufstellung der "{element_name}" nach Monaten',self.folder_res[element_name]+self.folder_sep+'Monatliche Sparcents.png')
             
             else:##Cost & month plot Main Data
                 #NEW auto-adjust plottypes for excels and concats, if total income is empty
@@ -66,8 +65,8 @@ class Plotters:
                 cost_total=self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(total_income['cat'].tolist()+['Gesamtsaldo\nder Periode'])==False].copy()
                 cost_total[['val','val_month']]=cost_total[['val','val_month']].abs()
                 cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True)
-                self.plotinfo_costs[element_name]=[(cost_total,f'Detaillierte Gesamtübersicht der Kostenkategorien für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Komplettübersicht Kostenkategorien.jpg')]
-                self.plotinfo_month[element_name]=(f'Monatsaufstellung für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung.jpg')
+                self.plotinfo_costs[element_name]=[(cost_total,f'Detaillierte Gesamtübersicht der Kostenkategorien für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Komplettübersicht Kostenkategorien.png')]
+                self.plotinfo_month[element_name]=(f'Monatsaufstellung für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung.png')
            
 
             ##Prepare TOP3-Plots:
@@ -76,15 +75,17 @@ class Plotters:
                 ##create Top3-List (depending on length of total_income list)
                 
                 if len(total_income)>3:
-                    self.top3[element_name]=total_income.loc[0:3].copy()
-                    self.top3[element_name]=self.top3[element_name].append(cost_total[0:3],ignore_index=True)
+                    self.top3[element_name]=total_income.loc[0:2].copy()
+                    self.top3[element_name]=self.top3[element_name].append(cost_total.loc[0:2],ignore_index=True)
                 else:
                     self.top3[element_name]=total_income.copy()
-                    self.top3[element_name]=self.top3[element_name].append(cost_total[0:3],ignore_index=True)
+                    self.top3[element_name]=self.top3[element_name].append(cost_total.loc[0:2],ignore_index=True)
 
                 
                 ##Adjusted TOP3 without invest/get rent and total balance
                 top3_adj=self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Miete','Gesamtsaldo\nder Periode'])].copy()
+                ##make values positive for category rent
+                top3_adj.loc[top3_adj.cat=='Miete',['val','val_month']]=top3_adj.loc[top3_adj.cat=='Miete',['val','val_month']].abs()
                
                 ##get net total of income and invest 
                 lohn_inv_val=total_income['val'].sum()+self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])]['val'].sum()
@@ -118,7 +119,7 @@ class Plotters:
             ##print cost categories with holidays grouped together
             if (len(cost_hol.index)>1) and not (element_name=='Sparcents'):
                 cost_hol_group=cost_total_adj.copy()
-                self.plotinfo_costs[element_name].append((cost_hol_group,f'Übersicht der Kostenkategorien mit Urlauben (gesamt) für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht Kosten_Urlaube (gesamt).jpg'))
+                self.plotinfo_costs[element_name].append((cost_hol_group,f'Übersicht der Kostenkategorien mit Urlauben (gesamt) für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht Kosten_Urlaube (gesamt).png'))
 
 
             ##Pie costs without holidays (right side)
@@ -134,14 +135,14 @@ class Plotters:
             cost_pie_total_holadj=cost_pie_total_holadj.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate2_hol.loc[cost_intermediate2_hol['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate2_hol.columns)),ignore_index=True)
             
             data_pie_hol=(cost_pie_total_holadj,cost_pie_nothol)
-            plotinfo_pieplot_hol=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Urlauben zusammengefasst','Anteilsübersicht ohne Urlaube',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Urlaub.jpg')
+            plotinfo_pieplot_hol=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Urlauben zusammengefasst','Anteilsübersicht ohne Urlaube',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Urlaub.png')
             self.plotinfo_piechart[element_name]=[(data_pie_hol,plotinfo_pieplot_hol)]
             
             ##Adjust Cost & pie plots for invest
             if len(self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])].index) > 0:
                 cost_hol_group=cost_total_adj.copy()
                 cost_notinv=cost_hol_group[cost_hol_group['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])==False].reset_index(drop=True)
-                self.plotinfo_costs[element_name].append((cost_notinv,f'Detaillierte Übersicht Kostenkategorien mit Urlauben (gesamt) ohne Investkosten für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht_ohne Invest.jpg'))
+                self.plotinfo_costs[element_name].append((cost_notinv,f'Detaillierte Übersicht Kostenkategorien mit Urlauben (gesamt) ohne Investkosten für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht_ohne Invest.png'))
             
                 ##Get second pie plot, if invest is existing
                 
@@ -159,7 +160,7 @@ class Plotters:
                 cost_pie_total_invadj=cost_pie_total_invadj.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate2_inv.loc[cost_intermediate2_inv['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate2_inv.columns)),ignore_index=True)
                 
                 data_pie_inv=(cost_pie_total_invadj,cost_pie_notinv)
-                plotinfo_pieplot_inv=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Invest','Anteilsübersicht ohne Invest',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Invest.jpg')
+                plotinfo_pieplot_inv=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Invest','Anteilsübersicht ohne Invest',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Invest.png')
                 self.plotinfo_piechart[element_name].append((data_pie_inv,plotinfo_pieplot_inv))                             
 
             else:#no action needed
@@ -168,7 +169,7 @@ class Plotters:
             #plot detailed infos for multiple sources of income
             if len(total_income)>3:
                 #plot income categories as cost plot
-                self.plotinfo_costs[element_name].append((total_income,f'Detaillierte Übersicht über die verschiedenen Einkommensquellen für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Einkommensübersicht.jpg'))
+                self.plotinfo_costs[element_name].append((total_income,f'Detaillierte Übersicht über die verschiedenen Einkommensquellen für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Einkommensübersicht.png'))
                 
                 #Create pie plot for multiple sources of income (right without standard salary)
                 
@@ -187,7 +188,7 @@ class Plotters:
                 income_pie_wage=income_pie_wage.append(pd.DataFrame([['Restliche mit <2%',sum(income_wage.loc[income_wage['ppt']<2.0]['ppt'])]],columns=list(income_wage.columns)),ignore_index=True)
 
                 data_pie_income=(income_pie_wage,income_pie_nowage)
-                plotinfo_pieplot_income=(f'Tortendiagramm Einkommensquellen >2% Anteil für "{element_name}"','Anteilsübersicht mit Lohn / Gehalt','Anteilsübersicht ohne Lohn / Gehalt',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Einkommensquellen.jpg')
+                plotinfo_pieplot_income=(f'Tortendiagramm Einkommensquellen >2% Anteil für "{element_name}"','Anteilsübersicht mit Lohn / Gehalt','Anteilsübersicht ohne Lohn / Gehalt',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Einkommensquellen.png')
                 self.plotinfo_piechart[element_name].append((data_pie_income,plotinfo_pieplot_income))   
                 
                 
@@ -207,14 +208,14 @@ class Plotters:
                 #Boxplot
                 if plot_selection=='b':
                     boxplottitle=f'Umsatzübersicht (Boxplot) nach Kategorie für "{element_name}"'
-                    printname_box=self.folder_res[element_name]+self.folder_sep+'Boxplot Übersicht.jpg'
+                    printname_box=self.folder_res[element_name]+self.folder_sep+'Boxplot Übersicht.png'
                     plotters.boxplotter(self.basis_data[element_name],self.month_data[element_name],boxplottitle,printname_box)
 
                 #Violinplot
                 elif plot_selection=='v':
                     
                     violintitle=f'Detaillierte Umsatzübersicht (Violinplot) nach Kategorie für "{element_name}"'
-                    printname_vio=self.folder_res[element_name]+self.folder_sep+'Violinplot Übersicht.jpg'
+                    printname_vio=self.folder_res[element_name]+self.folder_sep+'Violinplot Übersicht.png'
                     plotters.violinplotter(self.basis_data[element_name],self.month_data[element_name],violintitle,printname_vio)
 
                 #Monthplot
@@ -224,7 +225,7 @@ class Plotters:
 
                 #TOP3-Plots
                 elif plot_selection=='o':
-                    plotinfo_overview=(f'Überblicksübersicht Kosten und Einkünfte für "{element_name}"','Einkünfte und TOP-Kostenblöcke','Einkünfte inkl. Saldo Kapitalanlagen\n & Restliche Kostenpositionen',self.folder_res[element_name]+self.folder_sep+'Überblickübersicht.jpg')
+                    plotinfo_overview=(f'Überblicksübersicht Kosten und Einkünfte für "{element_name}"','Einkünfte und TOP-Kostenblöcke','Einkünfte inkl. Saldo Kapitalanlagen\n & Restliche Kostenpositionen',self.folder_res[element_name]+self.folder_sep+'Überblickübersicht.png')
                     plotters.overviewplot(self.top3[element_name],self.top3_adj[element_name],self.month_data[element_name],plotinfo_overview)
 
                 #Categorical cost plot
@@ -242,12 +243,12 @@ class Plotters:
                 else: 
                     #Boxplot
                     boxplottitle=f'Umsatzübersicht (Boxplot) nach Kategorie für "{element_name}"'
-                    printname_box=self.folder_res[element_name]+self.folder_sep+'Boxplot Übersicht.jpg'
+                    printname_box=self.folder_res[element_name]+self.folder_sep+'Boxplot Übersicht.png'
                     plotters.boxplotter(self.basis_data[element_name],self.month_data[element_name],boxplottitle,printname_box)
 
                     #Violinplot
                     violintitle=f'Detaillierte Umsatzübersicht (Violinplot) nach Kategorie für "{element_name}"'
-                    printname_vio=self.folder_res[element_name]+self.folder_sep+'Violinplot Übersicht.jpg'
+                    printname_vio=self.folder_res[element_name]+self.folder_sep+'Violinplot Übersicht.png'
                     plotters.violinplotter(self.basis_data[element_name],self.month_data[element_name],violintitle,printname_vio)
 
                     #Month plot
