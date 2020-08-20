@@ -1,4 +1,4 @@
-# KYSA_v101
+# KYSA
 
 Know Your Spendings Application. 6 account types supported, basic GUI established. Required pip modules can be found in the requirements.txt. 
 
