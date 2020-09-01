@@ -191,7 +191,7 @@ def monthplotter(plotinfo,data_month):
 	#get x coordinates for horizontal line
 	xleft,xright=ax.get_xlim()
 	ax.hlines(y=balance,xmin=xleft,xmax=xright,linestyle='dashdot',linewidth=3) #plot horizontal line
-	ax.text(xright, balance,  "Saldo der Periode\n auf Monatsbasis:\n",ha='left', va='bottom',fontsize=14,fontweight='heavy')#Label horizontal line
+	ax.text(xright, balance, "Ø-Monatssaldo des\n Gesamtzeitraums:\n",ha='left', va='bottom',fontsize=14,fontweight='heavy')#Label horizontal line
 	ax.text(xright, balance,f"        {balance:,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."), ha='left', va='center',fontsize=14,fontweight='heavy') #Value horizontal line
 
 	##set labels and titles
