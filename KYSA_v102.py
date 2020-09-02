@@ -2,7 +2,6 @@
 
 
 '''This is the main script started by the user. After asking whether data shall be processed or just plotted the data is categorized and preprocessed for plotting.
-If data is just read in for plotting the user can choose between the different types of plots. For raw data from csv-files beeing processed the plotting choice is predetermined.
 After preprocessing the data is saved as excel files in the same folder as the plots. Plot data-format is *.jpg. Have fun using the script'''
 
 
