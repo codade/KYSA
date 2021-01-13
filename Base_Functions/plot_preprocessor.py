@@ -3,13 +3,9 @@
 Pie relative portion charts are created for cost components >2%, and shown separately according to investment and holiday costs with regards to total costs.'''
 
 from Base_Functions import plotters
-import matplotlib.pyplot as plt 
 import numpy as np
 import pandas as pd
 import platform 
-import seaborn as sns
-import matplotlib.pyplot as plt 
-
 
 if platform.system()=='Windows':
     folder_sep='\\'
@@ -31,6 +27,8 @@ class Plotters:
         self.top3_adj={}
         self.plotinfo_month={}
         self.plotinfo_costs={}
+        self.plotinfo_boxplot={}
+        self.plotinfo_vioplot={}
         self.plotinfo_piechart={}
         self.folder_sep=folder_sep
         self.folder_res=accounts_data.folder_res
@@ -42,23 +40,48 @@ class Plotters:
         ##Shuffle through items:
         for element_name in self.plot_elements:
                         
-            ##create dataframe containing all income categories:
+            ##create dataframe containing all income categories for further usage:
             total_income=self.cat_data[element_name][(self.cat_data[element_name]['cat'].str.contains('Urlaub|Gesamtsaldo|Sonstiges|Abhebung|Bargeld')==False)&(self.cat_data[element_name]['val']>0)].copy()
            
-            ##adjust plot_data if savecent was selected
+            ## prepare cost and month plots for accounts 
+            # do specific adjustements for savecents, holidays and cashbook cat_data as these categorial elements are stored in a different manner than normal account cat_data
             if element_name=='Sparcents':
-                self.plotinfo_costs[element_name]=[(self.cat_data[element_name],f'Übersicht über die Herkunft und Summe der "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Übersicht Sparcents.png')]
-                self.plotinfo_month[element_name]=(f'Aufstellung der "{element_name}" nach Monaten',self.folder_res[element_name]+self.folder_sep+'Monatliche Sparcents.png')
+                #savecents cat data differs from other cat_data. Therefore separate handling is necessar
+                self.plotinfo_costs[element_name]=[(self.cat_data[element_name],f'Übersicht über die Herkunft und Summe der "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Übersicht Sparcents.png')]#cost plot data & info
+                
+                #separate month data for possible plot splittung
+                month_plot=self.month_data[element_name].copy()
+                self.plotinfo_month[element_name]=[(month_plot,f'Absteigend sortierte Aufstellung der "{element_name}" je Monat',self.folder_res[element_name]+self.folder_sep+'Monatliche Sparcents.png')] #month plot data & info
             
             elif element_name=='Urlaube':
-                self.cat_data[element_name].loc[self.cat_data[element_name]['cat']=='Gesamtsaldo\nder Periode','cat']='Summe aller\nUrlaubsausgaben'
+                # specific actions necessary to specifically created "holiday" account
+
+                self.cat_data[element_name].loc[self.cat_data[element_name]['cat']=='Gesamtsaldo\nder Periode','cat']='Summe aller\nUrlaubsausgaben'#rename total amount to total holiday spendings in cat_data
                 cost_total=self.cat_data[element_name]
-                cost_total[['val','val_month']]=cost_total[['val','val_month']].abs()
-                cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True)
-                self.plotinfo_costs[element_name]=[(cost_total,f'Kostensummen der einzelnen Urlaube',self.folder_res[element_name]+self.folder_sep+'Übersicht Urlaubskosten.png')]
-                self.plotinfo_month[element_name]=(f'Monatliche Aufstellung der Urlaubsausgaben',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung Urlaube.png')
+                cost_total[['val','val_month']]=cost_total[['val','val_month']].abs() #do sign reversal for better cost depicting 
+                cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True) #sorting descending
+                self.plotinfo_costs[element_name]=[(cost_total,f'Kostensummen der einzelnen Urlaube',self.folder_res[element_name]+self.folder_sep+'Übersicht Urlaubskosten.png')] #cost plot data & info
+                
+                #separate month data for possible plot splittung
+                month_plot=self.month_data[element_name].copy()
+                self.plotinfo_month[element_name]=[(month_plot,'Monatliche Aufstellung der Urlaubsausgaben',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung Urlaube.png')] #month plot data & info
 
+            elif element_name=='Haushaltsbuch':
 
+                cashbook_cats=self.cat_data[element_name].copy()
+                cashbook_cats1=cashbook_cats[cashbook_cats.columns[[0,1,2]]] #first cat_dataset (grouped by cost categories)
+                cashbook_cats2=cashbook_cats[cashbook_cats.columns[[3,4,5]]] #second cat_dataset (grouped by account types)
+                cost_cat1=cashbook_cats1[cashbook_cats1['val'].isnull()==False] #delete null values
+                cost_cat2=cashbook_cats2[cashbook_cats2['val_2'].isnull()==False].copy() #delete null values
+                cost_cat2.columns=["cat","val","val_month"]
+
+                self.plotinfo_costs[element_name]=[(cost_cat1,'Übersicht über die Bargeldzahlungen nach Kostenkategorien',self.folder_res[element_name]+self.folder_sep+'Übersicht Bargeldzahlungen.png')] #cost plot data & info
+                self.plotinfo_costs[element_name].append((cost_cat2,'Übersicht über die Bargeldabhebungen nach Kontokategorie',self.folder_res[element_name]+self.folder_sep+'Übersicht Bargeldabhebungen.png')) #cost plot data & info
+                
+                #separate month data for possible plot splittung
+                month_plot=self.month_data[element_name].copy()
+                self.plotinfo_month[element_name]=[(month_plot,'Monatliche Aufstellung der Bargeldzahlungen',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung Bargeldzahlungen.png')] #month plot data & info
+                
             else:##Cost & month plot Main Data
                 
                 
@@ -71,10 +94,13 @@ class Plotters:
                     pass
 
                 cost_total=self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(total_income['cat'].tolist()+['Gesamtsaldo\nder Periode'])==False].copy()
-                cost_total[['val','val_month']]=cost_total[['val','val_month']].abs()
-                cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True)
-                self.plotinfo_costs[element_name]=[(cost_total,f'Detaillierte Gesamtübersicht der Kostenkategorien für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Komplettübersicht Kostenkategorien.png')]
-                self.plotinfo_month[element_name]=(f'Monatsaufstellung für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung.png')
+                cost_total[['val','val_month']]=cost_total[['val','val_month']].abs() #do sign reversal for better cost depicting
+                cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True) #sorting descending
+                self.plotinfo_costs[element_name]=[(cost_total,f'Detaillierte Gesamtübersicht der Kostenkategorien für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Komplettübersicht Kostenkategorien.png')] #cost plot data & info
+                
+                #separate month data for possible plot splittung
+                month_plot=self.month_data[element_name].copy()
+                self.plotinfo_month[element_name]=[(month_plot,f'Aufstellung der Monatssalden für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung.png')] #month plot data & info
            
 
             ##Prepare TOP3-Plots:
@@ -125,7 +151,7 @@ class Plotters:
             cost_total_adj=cost_total_adj.sort_values('val',ascending=False).reset_index(drop=True)
 
             ##print cost categories with holidays grouped together
-            if (len(cost_hol.index)>1) and not ((element_name=='Sparcents') or (element_name=='Urlaube')):
+            if (len(cost_hol.index)>1) and not (element_name=='Sparcents' or element_name=='Urlaube' or element_name=='Haushaltsbuch'):
                 cost_hol_group=cost_total_adj.copy()
                 self.plotinfo_costs[element_name].append((cost_hol_group,f'Übersicht der Kostenkategorien mit Urlauben (gesamt) für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht Kosten_Urlaube (gesamt).png'))
 
@@ -195,12 +221,10 @@ class Plotters:
                 pass
             
             #plot detailed infos for multiple sources of income
-            if len(total_income)>3:
+            if len(total_income)>3 and not (element_name=='Sparcents' or element_name=='Urlaube'or element_name=='Haushaltsbuch'):
                 #plot income categories as cost plot
-                if not (element_name=='Sparcents' or element_name=='Urlaube'):
-                    self.plotinfo_costs[element_name].append((total_income,f'Detaillierte Übersicht über die verschiedenen Einkommensquellen für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Einkommensübersicht.png'))
-                else:
-                    pass
+                self.plotinfo_costs[element_name].append((total_income,f'Detaillierte Übersicht über die verschiedenen Einkommensquellen für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Einkommensübersicht.png'))
+   
                 #Create pie plot for multiple sources of income (right without standard salary)
                 
                 ##Pie imcome without wages (right side)
@@ -236,39 +260,175 @@ class Plotters:
             else: # no action needed
                 pass
 
+    
+    def plotsplitter(self,element_name,plottype):
+        #split large data frames an create subplots (month-data basis stays constant)
+
+        if plottype=='monthplot':
+            plottinglist=self.plotinfo_month[element_name].copy()
+
+        elif plottype=='costplot':
+            plottinglist=self.plotinfo_costs[element_name].copy()
+
+        elif plottype=='boxplot':
+            plottinglist=self.plotinfo_boxplot[element_name].copy()
+
+        elif plottype=='vioplot':
+            plottinglist=self.plotinfo_vioplot[element_name].copy()
+
+        
+        else:
+            pass
+
+        adjusted_plots=[]
+
+        #split dataframes if necessary (necessary if more than 18 categories)
+        for plotinfo in plottinglist:
+            data_old,title_old,path_old=plotinfo
+
+            if plottype=='vioplot' or plottype=='boxplot':
+                #split box and violinplot every 22 categories
+                box_cat_nums=data_old['cat'].unique()
+               
+                if len(box_cat_nums)>22:
+                    if len(box_cat_nums)>66:
+                        var3=4
+                    elif len(box_cat_nums)>44:
+                        var3=3
+                    else:
+                        var3=2
+
+                    plotslicing=True
+                    #do first data slice
+                    box_slicejump=21 #21 as 0 ist counted as index, as well
+                    box_index_new=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]      
+                    slice_var=[0,box_index_new+1] #adjustments for boxplot slicing #+1 for upper slice_var as the final line of the last category has to be included (range [x:y) goes up to y but not including y])
+                else:#if dataframe has less then 22 cats, do no slicing
+                    plotslicing=False
+
+            #slices for cost and monthplots
+            else:
+                #split month and cost data every 18 entries
+                if len(data_old)>18:#0-17=18 (setting >18 (+1) prevents that a single entry dataframe is created)
+                    if len(data_old)>54:
+                        var3=4
+                    elif len(data_old)>36:
+                        var3=3
+                    else:
+                        var3=2
+                    slice_var=[0,18]
+                    plotslicing=True
+
+                else:#if cost or monthplot has less than 18 entries, do no slicing
+                    plotslicing=False
+
+
+            name_var="I"#enumerator für plots
+            sublist=[]
+
+            #start plot sclicing
+            if plotslicing:
+
+                for x in range (0,var3):
+                    #do slicing and renaming
+                    new_data=data_old[slice_var[0]:slice_var[1]]
+                    new_title=title_old+" Teil "+name_var
+                    new_path=path_old[:-4]+"_"+name_var+".png"
+
+                    #add subplot to plotting list
+                    sublist.append((new_data,new_title,new_path))
+
+                    if plottype=='vioplot' or plottype=='boxplot':
+                        #adjust slicer for boxplots (every 22 categories a new plot)  
+                        if x+2<var3:
+                            box_index_old=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]+1 #row number of last category + 1 row
+                            box_slicejump+=22 #box_slice_jump + 22 as every 22 categories a new plot is generated
+                            box_index_new=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]
+                        
+                        else:
+                            box_index_old=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]+1 #row number of last category + 1 row                       
+                            box_index_new=data_old.index[-1]
+
+                                              
+                        slice_var=[box_index_old,box_index_new+1]#+1 for upper slice_var as the final line of the last category has to be included (range [x:y) goes up to y but not including y])
+                    else:
+                        #adjust slicer for month&costplot (every 18 entries a new plot)
+                        slice_var = [x+18 for x in slice_var]
+
+                    #adjust name enumerator
+                    if x==2:
+                        name_var='IV'
+                    elif x==3:
+                        name_var='V'
+                    else:
+                        name_var=name_var+"I"
+
+            else:
+                #add plot without slicing to plotting list (basically equal to old list)
+                sublist.append(plotinfo)
+        #     
+        # #plot data
+            for subindex in range(len(sublist)):
+                if subindex==0:
+                    axadjust=("getval",(0,0))
+
+                else:
+                    axadjust=("setval",axvalue)
+
+                #choose plotter
+                if plottype=='monthplot':
+                    axvalue=plotters.monthplotter(sublist[subindex],axadjust,self.month_data[element_name])
+
+                elif plottype=='costplot':
+                    axvalue=plotters.costplotter(sublist[subindex],axadjust,self.month_data[element_name])
+                    
+
+                elif plottype=='boxplot':
+                    axvalue=plotters.boxplotter(sublist[subindex],axadjust,self.month_data[element_name])
+
+                elif plottype=='vioplot':
+                    axvalue=plotters.violinplotter(sublist[subindex],axadjust,self.month_data[element_name])
+
+
+
+
+
     def plotdata(self):
         
         for element_name in self.plot_elements:
+            #plot loop for every element in plot_elements including savecent, cashbook and holiday
+            #every element has its own plot selection saved in plotting choice. Basic choice contains month plot and cost plot
 
             plot_selection=self.plotting_choice[element_name]
                 
             ##Plot selection
-
             ###Plot basic choice (monthplot and costplot)
 
-
             #Month plot
-            plotters.monthplotter(self.plotinfo_month[element_name],self.month_data[element_name])
+            self.plotsplitter(element_name,'monthplot')
 
             #Categorical cost plot
-            for cost_entry in self.plotinfo_costs[element_name]:                      
-                plotters.costplotter(cost_entry,self.month_data[element_name])
+            self.plotsplitter(element_name,'costplot')
 
             ###Plot normal choice (basic choice + box & violinplot)
 
             if plot_selection=='normal' or plot_selection=='complete':
 
                 #Boxplot
-                boxplottitle=f'Umsatzübersicht (Boxplot) nach Kategorie für "{element_name}"'
-                printname_box=self.folder_res[element_name]+self.folder_sep+'Boxplot Übersicht.png'
-                plotters.boxplotter(self.basis_data[element_name],self.month_data[element_name],boxplottitle,printname_box)
+                #copy data for possible plot slicing
+                box_vioplot_data=self.basis_data[element_name].copy()
+                box_vioplot_data=box_vioplot_data.sort_values(['cat']).reset_index()#sort by categories
+                #create plotinfo
+                self.plotinfo_boxplot[element_name]=[(box_vioplot_data,f'Boxplot aller Umsätze nach Kategorie für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Boxplot.png')]
+                self.plotsplitter(element_name,'boxplot')
 
                 #Violinplot
-                violintitle=f'Detaillierte Umsatzübersicht (Violinplot) nach Kategorie für "{element_name}"'
-                printname_vio=self.folder_res[element_name]+self.folder_sep+'Violinplot Übersicht.png'
-                plotters.violinplotter(self.basis_data[element_name],self.month_data[element_name],violintitle,printname_vio)
+                #use same dataframe as for boxplots
+                self.plotinfo_vioplot[element_name]=[(box_vioplot_data,f'Violinplot aller Umsätze nach Kategorie für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Violinplot.png')]
+                self.plotsplitter(element_name,'vioplot')
 
                 if plot_selection=='complete':
+                    #complete plot includes top3 overview and pie charts
 
                     #"TOP3" / Overwiew Plot
                     plotinfo_overview=(f'Überblicksübersicht Kosten und Einkünfte für "{element_name}"','Einkünfte und TOP-Kostenblöcke','Einkünfte inkl. Saldo Kapitalanlagen\n & Restliche Kostenpositionen',self.folder_res[element_name]+self.folder_sep+'Überblicksübersicht.png')
@@ -283,3 +443,4 @@ class Plotters:
 
             else:
                 pass
+
