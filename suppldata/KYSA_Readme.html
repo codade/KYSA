@@ -54,6 +54,8 @@ Import von csv-Dateien folgender Banken:</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Commerzbank (Giro)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
+	<font face="Helvetica, sans-serif">Consorsbank (Giro)</font></p>
+	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">DKB (Giro&amp;Kredit)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Deutsche Bank (Giro)</font></p>
@@ -72,7 +74,7 @@ ausgewählten Dateien ein und gibt als Ergebnis für jedes Konto
 mit den Auswertungsergebnissen sowie verschiedene Diagramme aus. Der
 Nutzer kann mehrere Dateien für die Auswertung</font> <font face="Helvetica, sans-serif">auswählen,
 dabei müssen alle Rohdateien in einem Ordner liegen. Die Ergebnisse
-werden in einem Unterordner dieses Ordners abgelegt.</font></p>
+werden in einem Unterordner dieses Ordners abgelegt. Seit Version 2.03 kann alternativ über das Einstellungsmenü ein Ordner bestimmt werden, in dem die Ergebnisse abgelegt werden sollen.</font></p>
 <h2 class="western" align="left">Wofür braucht man die
 Zuordnungstabelle?</h2>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Mit
@@ -172,15 +174,33 @@ werden, welche Dateien zusammengefügt werden sollen und welchen
 Namen diese neue Datei(en) dann haben soll(en). Als Ergebnis werden
 eine Excel-Datei und einige Diagramme zu jeder neuen Datei in dem
 Ordner mit dem Dateinamen abgelegt.</font></p>
-<h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">Dateien
-auswählen</h2>
+<h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">
+Dateien auswählen</h2>
 <p><font face="Helvetica, sans-serif">Hier können die Rohdateien
 (csv) oder die nachträglich veränderten Excel-Ergebnisdateien
 ausgewählt werden. Es können mehrere Dateien auf einmal ausgewählt
 werden, allerdings müssen sich alle auszuwertenden Dateien in einem
 Ordner befinden.</font></p>
-<h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">Kontoauswerter
-starten</h2>
+<h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">Haushaltsbuch</h2>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Im
+Haushaltsbuch können Bargeldausgaben separat eingetragen werden,
+sodass diese mit den Kontodaten (Bargeldabhebung) verknüpft werden
+können. So können die einzelnen Ausgaben noch besser analysiert
+werden, da in den Kontoumsätzen nur die Bargeldabhebung ausgewiesen
+werden. Wichtig für die Analyse des Haushaltsbuchs ist die
+Einhaltung der Formatierungs- und Eingabevorgaben im Tabellenblatt
+„Legende“. Nur so können die jeweiligen Daten extrahiert und mit
+den Kontodaten verknüpft werden. Das Programm überprüft für jeden
+eingelesenen Kontotyp, ob Daten zu der im Haushaltsbuch angegebenen Bargeldkategorie existieren. Sollte dies der Fall sein, werden
+jene Zeilen, die innerhalb des betrachteten Zeitraums der Rohdaten
+liegen, extrahiert und zu den Rohdaten hinzugefügt. Die hinzugefügten Einträge werden automatisch mit dem Gesamtbetrag der Bargeldkategorie verrechnet.
+Der verbleibende Betrag weist dann die nicht durch zusätzliche Informationen aus dem Haushaltsbuch verbliebenen Bargeldausgaben aus.
+Sollten Daten
+für den Kontotyp existieren, aber dennoch keine Verknüpfung
+erfolgen, wird ein Hinweis mit Fehlercodes (siehe Kap. Fehlercodes)
+ausgeben.</font></p>
+<h2 class="western" align="left" style="margin-top: 0.6cm; margin-bottom: 0.3cm">
+Kontoauswerter starten</h2>
 <p><font face="Helvetica, sans-serif">Startet den Auswertungsprozess.
 Wenn die Datei-Zusammenführung gewählt wurde, kommt nach dem
 erfolgreichen Dateiimport die Anzeige einer Matrix. Hier kann durch
@@ -226,7 +246,8 @@ und Datenschutzhinweis</b></font></font></h1>
 <p><font face="Helvetica, sans-serif">Die Nutzung dieses Programms
 ist kostenfrei. Ich übernehme keinerlei Haftung für Ergebnisse und
 oder eventuelle Probleme bzw. etwaige Datenverluste, die bei der
-Nutzung auftreten. Es gelten die Bestimmungen der <a href="https://opensource.org/licenses/BSD-2-Clause">2-Klausel-BSD-Lizenz</a>.</font></p>
+Nutzung auftreten. Es gelten die Bestimmungen der 3-Klausel-BSD
+-Lizenz. Näheres dazu findet sich im <a href="KYSA_License.html">Lizenzhinweis</a>.</font></p>
 <p><font face="Helvetica, sans-serif">Spenden sind über </font><a href="https://de.liberapay.com/Waldbader/"><font face="Helvetica, sans-serif"><font size="4" style="font-size: 14pt">Liberapay</font></font></a>
 <font face="Helvetica, sans-serif">willkommen.</font></p>
 <p><br/>
@@ -236,8 +257,8 @@ Nutzung auftreten. Es gelten die Bestimmungen der <a href="https://opensource.or
 <p><font face="Helvetica, sans-serif"><b>Datenschutzhinweis: </b>Das
 Programm sammelt keinerlei persönliche Daten. Eine
 Internetverbindung ist ausschließlich notwendig, um das Programm
-herunterzuladen. Danach werden keinerlei weitere Daten aus dem
-Internet bezogen bzw. darüber verschickt.</font></p>
+herunterzuladen. Die Umsatzkategorisierung erfolgt manuell über die Zuordnungstabelle, sodass keine Daten aus dem
+Internet bezogen bzw. darüber verschickt werden.</font></p>
 <h1 class="western" align="center" style="margin-top: 1cm; margin-bottom: 0.6cm; page-break-before: always">
 <font face="Liberation Serif, serif"><font size="6" style="font-size: 24pt"><b>Fehlerbehebung</b></font></font></h1>
 <p align="left" style="margin-top: 0.43cm; margin-bottom: 0.2cm; line-height: 100%; background: transparent">
@@ -274,8 +295,11 @@ Prüfen Sie, ob Ihr Konto von KYSA unterstützt wird
 	&quot;Buchungstag&quot;,&quot;Wertstellung
 	(Valuta)&quot;,&quot;Vorgang&quot;,&quot;Buchungsinformationen&quot;,&quot;Umsatzbetrag
 	in EUR&quot;,&quot;Monat&quot;,&quot;Kategorie&quot; lauten und die
-	entsprechenden Inhalte aufweisen. </font>
-	</p>
+	entsprechenden Inhalte aufweisen. <br/>
+Sollte ein Haushaltsbuch
+	eingelesen und mit den Rohdaten der importierten csv-Dateien
+	verknüpft werden, muss das Haushaltsbuch die im Tabellenreiter
+	„Legende“ angegebene Formatierung aufweisen.</font></p>
 </ul>
 <h3 class="western">Fehlercode Err02:</h3>
 <p><font face="Helvetica, sans-serif">Es gab ein Problem bei der
@@ -320,5 +344,26 @@ Ordner vorliegt, in dem sich die Rohdaten befinden. Zudem kann es zu
 diesem Fehlercode kommen, wenn Excel-Dateien mit falsch zugeordneten</font>
 <font face="Helvetica, sans-serif">Inhalten in Diagrammen dargestellt
 werden sollen.</font></p>
+<h3 class="western">Fehlercode Err07:</h3>
+<p><font face="Helvetica, sans-serif">Dieser Fehler tritt nur auf,
+wenn ein Haushaltsbuch mit importierten csv-Rohdaten verknüpft
+werden soll. Der Fehlercode weist darauf hin, dass zwar für den
+Kontotyp (Comdirect Giro…) Daten im Haushaltsbuch gefunden wurden,
+allerdings die verwendete Bargeldbezeichnung nicht in den
+kategorisierten Rohdaten gefunden werden konnte. Stellen Sie sicher,
+dass die genutzte(n) Bargeldbezeichnung(en) identisch im
+Haushaltsbuch und der Zuordnungstabelle sind; Achten Sie auf Groß-und
+Kleinschreibung und eventuelle Leerzeichen.</font></p>
+<h3 class="western">Fehlercode Err08:</h3>
+<p><font face="Helvetica, sans-serif"><font face="Helvetica, sans-serif">Dieser
+Fehler tritt nur auf, wenn ein Haushaltsbuch mit importierten
+csv-Rohdaten verknüpft werden soll. Er zeigt an, dass trotz
+übereinstimmender Konto- und Bargeldbezeichnung keine Daten aus dem
+Haushaltsbuch übernommen wurden. Dies tritt insbesondere dann auf,
+wenn der Zeitraum relevanter Daten im Haushaltsbuch nicht in den
+Zeitraum der importierten csv-Daten passt. Prüfen Sie, ob die
+Einträge im Haushaltsbuch absteigend (neueste Ausgabe in der
+obersten Zeile) sortiert sind. </font></font>
+</p>
 </body>
 </html>
