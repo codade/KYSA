@@ -10,11 +10,11 @@ import os
 import re
 
 
-if platform.system()=='Windows':
-    locale.setlocale(locale.LC_ALL, '')
+if platform.system()=='Linux':
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
 else:
-    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
+    locale.setlocale(locale.LC_ALL, '')
 
 
 #necessary function to enable read-in even if singles dates are null values
@@ -25,7 +25,7 @@ def dateadjuster(val,timevar):
         else: 
             return datetime.datetime.strptime(val, "%d.%m.%y")
     except:
-        return pd.NaT
+        return pd.NaT #returns pandas null value if date isn't existent
 
 
 dateparser_capy = lambda x: dateadjuster(x,'capy')
@@ -34,33 +34,36 @@ dateparser_lowy = lambda x: dateadjuster(x,'lowy')
 
 #function for creating account dictionary
 def make_accinfo_dict():
+    #list of account specific info necessary for standardization process (merging/dropping columns and classification)
 
-    comd_giro_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungstext","Umsatz in EUR"],('no',[]),('no',[],[]),'giro',('yes','Bargeld','Bargeld\nComdirect'),'complete')
+    comdirect_giro_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungstext","Umsatz in EUR"],('no',[]),('no',[],[]),'giro',('yes','Bargeld','Bargeld\nComdirect'),'complete')
 
-    comd_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'credit',('no',"",""),'normal')
+    comdirect_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'credit',('no',"",""),'normal')
 
-    dkb_giro_info=(['Buchungstag', 'Wertstellung', 'Buchungstext','Auftraggeber/Begünstigter', 'Verwendungszweck', 'Kontonummer', 'BLZ', 'Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz'],('yes',[3,4,5]),('yes',[3,4,5,6,8,9,10],[0,1,2,4,3]),'giro',('yes','Kosten Lebens-\nhaltung','Einzahlungen'),'complete')
+    dkb_giro_info=(['Buchungstag', 'Wertstellung', 'Buchungstext','Auftraggeber/Begünstigter', 'Verwendungszweck', 'Kontonummer', 'BLZ', 'Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz','Unnamed: 11'],('yes',[3,4,5]),('yes',[3,4,5,6,8,9,10,11],[0,1,2,4,3]),'giro',('yes','Kosten Lebens-\nhaltung','Einzahlungen'),'complete')
 
     dkb_credit_info=(["Umsatz abgerechnet und nicht im Saldo enthalten","Wertstellung","Belegdatum","Beschreibung","Betrag (EUR)","Ursprünglicher Betrag"],('no',[]),('yes',[0,5],[0,1,2,3]),'credit',('no',"",""),'normal')
 
-    mlp_triodos_info=(['Buchungstag', 'Valuta', 'Auftraggeber/Zahlungsempfänger', 'Empfänger/Zahlungspflichtiger', 'Konto-Nr.', 'IBAN', 'BLZ', 'BIC', 'Vorgang/Verwendungszweck', 'Kundenreferenz', 'Währung', 'Umsatz', 'Soll/Haben', 'Vorgang'],('yes',[3,8,9]),('yes',[2,3,4,5,6,7,8,9,10,12],[0,1,3,4,2]),'giro',('no',"",""),'complete')
+    mlp_triodos_giro_info=(['Buchungstag', 'Valuta', 'Auftraggeber/Zahlungsempfänger', 'Empfänger/Zahlungspflichtiger', 'Konto-Nr.', 'IBAN', 'BLZ', 'BIC', 'Vorgang/Verwendungszweck', 'Kundenreferenz', 'Währung', 'Umsatz', 'Soll/Haben', 'Vorgang'],('yes',[3,8,9]),('yes',[2,3,4,5,6,7,8,9,10,12],[0,1,3,4,2]),'giro',('no',"",""),'complete')
 
-    apobank_info=(["Kontonummer","Buchungstag","Wertstellung","Auftraggeber/Empfänger","Textschlüssel","Buchungstext","VWZ1","VWZ2","VWZ3","VWZ4","VWZ5","VWZ6","VWZ7","VWZ8","VWZ9","VWZ10","VWZ11","VWZ12","VWZ13","VWZ14","Betrag","Kontostand","Währung"],('yes',[3,4,5,6,7,8,9,10,11]),('yes',[0,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22],[0,1,2,4,3]),'giro',('no',"",""),'complete')
+    apobank_giro_info=(["Kontonummer","Buchungstag","Wertstellung","Auftraggeber/Empfänger","Textschlüssel","Buchungstext","VWZ1","VWZ2","VWZ3","VWZ4","VWZ5","VWZ6","VWZ7","VWZ8","VWZ9","VWZ10","VWZ11","VWZ12","VWZ13","VWZ14","Betrag","Kontostand","Währung"],('yes',[3,4,5,6,7,8,9,10,11]),('yes',[0,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22],[0,1,2,4,3]),'giro',('no',"",""),'complete')
 
     sparka_giro_info=(["Auftragskonto","Buchungstag","Valutadatum","Buchungstext","Verwendungszweck","Begünstigter/Zahlungspflichtiger","Kontonummer","BLZ","Betrag","Währung","Info"],('yes',[4,5,6]),('yes',[0,4,5,6,7,9,10],[0,1,2,4,3]),'giro',('no',"",""),'complete')
 
-    deutschebank_info=(['Buchungstag', 'Wert', 'Umsatzart', 'Begünstigter / Auftraggeber', 'Verwendungszweck', 'IBAN', 'BIC', 'Kundenreferenz', 'Mandatsreferenz ', 'Gläubiger ID', 'Fremde Gebühren', 'Betrag', 'Abweichender Empfänger', 'Anzahl der Aufträge', 'Anzahl der Schecks', 'Soll', 'Haben', 'Währung', 'Umsatz in EUR'],('yes', [3,4,5,7]),('yes', [ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [0, 1, 2, 4, 3]),'giro',('no', '', ''),'complete')
+    consors_giro_info = (['Buchung', 'Valuta', 'Sender / Empfänger', 'IBAN / Konto-Nr.', 'BIC / BLZ', 'Buchungstext', 'Verwendungszweck', 'Kategorie', 'Stichwörter', 'Umsatz geteilt', 'Betrag in EUR'],('yes', [2,6]),('yes', [2, 3, 4, 6, 7, 8, 9], [0, 1, 2, 4, 3]),'giro',('no', '', ''),['complete'])
 
-    commerzbank_info=(["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"],('no', []),('yes', [ 5, 6, 7, 8, 9], [0, 1, 2, 3,4]),'giro',('no', '', ''),'complete')
+    deutsche_giro_info=(['Buchungstag', 'Wert', 'Umsatzart', 'Begünstigter / Auftraggeber', 'Verwendungszweck', 'IBAN', 'BIC', 'Kundenreferenz', 'Mandatsreferenz ', 'Gläubiger ID', 'Fremde Gebühren', 'Betrag', 'Abweichender Empfänger', 'Anzahl der Aufträge', 'Anzahl der Schecks', 'Soll', 'Haben', 'Währung', 'Umsatz in EUR'],('yes', [3,4,5,7]),('yes', [ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [0, 1, 2, 4, 3]),'giro',('no', '', ''),'complete')
 
-    accinfo_dictionary={'comd_giro':comd_giro_info,'comd_credit':comd_credit_info,'dkb_giro':dkb_giro_info,'dkb_credit':dkb_credit_info,'mlp_triodos':mlp_triodos_info,'apobank':apobank_info,'sparka_giro':sparka_giro_info, 'deutschebank':deutschebank_info, 'commerzbank':commerzbank_info}
+    commerz_giro_info=(["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"],('no', []),('yes', [ 5, 6, 7, 8, 9], [0, 1, 2, 3,4]),'giro',('no', '', ''),'complete')
+
+    accinfo_dictionary={'comdirect_giro':comdirect_giro_info,'comdirect_credit':comdirect_credit_info,'dkb_giro':dkb_giro_info,'dkb_credit':dkb_credit_info,'mlp_triodos_giro':mlp_triodos_giro_info,'apobank_giro':apobank_giro_info,'sparka_giro':sparka_giro_info, 'consors_giro':consors_giro_info, 'deutsche_giro':deutsche_giro_info, 'commerz_giro':commerz_giro_info}
     return accinfo_dictionary
 
 
 
 def acc_type_tester(filepath):
     #test inputted file for multiple acctypes. Return Account type for further data processing
-
+    #for loop tries accountt type. If error occurs account type is skipped. If account type matches account info data from dictionary is returned 
     
     raw_data=[]
     value='unsupported acctype'
@@ -74,34 +77,38 @@ def acc_type_tester(filepath):
                 raw_data['Buchungstext']=raw_data['Buchungstext'].apply(lambda x: x.split('"')[0])
             else:
                 pass
-            return ('comd_giro',raw_data)
+            #delete row with time1&time2 empty
+            raw_data=raw_data.drop(raw_data[(raw_data['Buchungstag'].isna()==True)&(raw_data['Wertstellung (Valuta)'].isna()==True)].index)
+            return ('comdirect_giro',raw_data)
+
         elif len(raw_data.columns)==6:
             raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3]+list(range(5,5+skipperint)),index_col=6,thousands='.',decimal=',',skipfooter=2,engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
             raw_data["Referenz"]=raw_data[raw_data.columns[3]].apply(lambda item: "{}{}".format('Ref. ', item))
-            return ('comd_credit',raw_data)
+            return ('comdirect_credit',raw_data)
+
         else:
             return ("other_acctype",raw_data)
 
 
-    def dkb_giro(filepath,skipperint):
-        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3,4,5]+list(range(7,7+skipperint)),index_col=11,thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
-        if raw_data.columns.tolist()==['Buchungstag','Wertstellung','Buchungstext','Auftraggeber / Begünstigter','Verwendungszweck','Kontonummer','BLZ','Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz']:
+    def deutschekreditbank(filepath,skipperint):
+        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3,4,5]+list(range(7,7+skipperint)),thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy)
+        
+        if raw_data.columns.tolist()==['Buchungstag','Wertstellung','Buchungstext','Auftraggeber / Begünstigter','Verwendungszweck','Kontonummer','BLZ','Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz','Unnamed: 11']:
             return ('dkb_giro',raw_data)
-        else:
-            return ("other_acctype",raw_data)
 
-    def dkb_credit(filepath,skipperint):
-        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3,4,5]+list(range(7,7+skipperint)),index_col=6,thousands='.',decimal=',',engine='python',parse_dates=[1,2],date_parser=dateparser_capy).reset_index(drop=True)
-        if len(raw_data.columns)==6:
+        elif raw_data.columns.tolist()==['Umsatz abgerechnet und nicht im Saldo enthalten', 'Wertstellung', 'Belegdatum', 'Beschreibung', 'Betrag (EUR)', 'Ursprünglicher Betrag', 'Unnamed: 6']:
+            raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3,4,5]+list(range(7,7+skipperint)),index_col=6,thousands='.',decimal=',',engine='python',parse_dates=[1,2],date_parser=dateparser_capy).reset_index(drop=True)
             return ('dkb_credit',raw_data)
+
         else:
             return ("other_acctype",raw_data)
 
 
-    def mlp_triodos(filepath,skipperint):
+    def mlp_triodos(filepath,skipperint):#currently only "giro" tested
         raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=list(range(0,12))+list(range(13,13+skipperint)),thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
         
-        #check if lowy dateparser should be used
+        #check if lowy dateparser is should be used
+        ##Notice: mlp lowy skips last 3 rows. Double check necessary
         if pd.isna(raw_data['Valuta'][2]):
             raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=list(range(0,12))+list(range(13,13+skipperint)),thousands='.',decimal=',',skipfooter=3,engine='python',parse_dates=[0,1],date_parser=dateparser_lowy).reset_index(drop=True)
             acctype_value='mlptrio_lowy'
@@ -115,14 +122,14 @@ def acc_type_tester(filepath):
         
         return (acctype_value,raw_data)
 
-    def apobank(filepath,skipperint):
+    def apobank(filepath,skipperint):#currently only "giro" tested
         raw_data=pd.read_csv(filepath,sep=",",skiprows=list(range(1,1+skipperint)),thousands='.',decimal=',',engine='python',parse_dates=[1,2],date_parser=dateparser_capy).reset_index(drop=True)
         if len(raw_data.columns)==23:
-            return ('apobank',raw_data)
+            return ('apobank_giro',raw_data)
         else:
             return ("other_acctype",raw_data)
 
-    def sparkasse(filepath,skipperint):
+    def sparkasse(filepath,skipperint):#currently only "giro" tested
         raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=list(range(1,1+skipperint)),thousands='.',decimal=',',engine='python',parse_dates=[1,2],date_parser=dateparser_lowy).reset_index(drop=True)
         if raw_data.columns.tolist()==['Auftragskonto','Buchungstag','Valutadatum','Buchungstext','Verwendungszweck','Beguenstigter/Zahlungspflichtiger','Kontonummer','BLZ','Betrag','Waehrung','Info']:
             
@@ -142,19 +149,31 @@ def acc_type_tester(filepath):
 
         return (acctype_value,raw_data)
 
-    def deutschebank(filepath,skipperint):
-        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3]+list(range(5,5+skipperint)),skipfooter=1,thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
-        raw_data['val']=raw_data['Soll'].mask(raw_data['Soll'].isna(),raw_data['Haben'])
-        return ('deutschebank',raw_data)
+    def consorsbank(filepath,skipperint):
 
-    def commerzbank(filepath,skipperint):
+        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=list(range(1,1+skipperint)),thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy)
+        
+        if raw_data.columns.tolist()==['Buchung', 'Valuta', 'Sender / Empfänger', 'IBAN / Konto-Nr.', 'BIC / BLZ', 'Buchungstext', 'Verwendungszweck', 'Kategorie', 'Stichwörter', 'Umsatz geteilt', 'Betrag in EUR']:
+            return ('consors_giro',raw_data)
+        else:
+            return ("other_acctype",raw_data)
+
+    def deutschebank(filepath,skipperint):#currently only "giro" tested
+        raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3]+list(range(5,5+skipperint)),skipfooter=1,thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
+        raw_data['val']=raw_data['Soll'].mask(raw_data['Soll'].isna(),raw_data['Haben'])#works as acc filter as well
+        return ('deutsche_giro',raw_data)
+
+    def commerzbank(filepath,skipperint):#currently only "giro" tested
         raw_data=pd.read_csv(filepath,encoding="iso8859_15",skiprows=list(range(1,1+skipperint)),sep=";",thousands='.',decimal=',',engine='python',parse_dates=[0,1],date_parser=dateparser_lowy).reset_index(drop=True)
-        raw_data.columns=["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"]
-        return ('commerzbank',raw_data)
+        if raw_data.columns.tolist()==['ï»¿Buchungstag', 'Wertstellung', 'Umsatzart', 'Buchungstext', 'Betrag', 'WÃ€hrung', 'Auftraggeberkonto', 'Bankleitzahl Auftraggeberkonto', 'IBAN Auftraggeberkonto', 'Kategorie']:
+            raw_data.columns=["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"]
+            return ('commerz_giro',raw_data)
+        else:#currently not necessary as this is the last function to be called
+            return ("other_acctype",raw_data)
     
   
   
-    for fn in (comdirect, dkb_giro, dkb_credit, mlp_triodos, apobank, sparkasse, deutschebank, commerzbank):
+    for fn in (comdirect, deutschekreditbank, mlp_triodos, apobank, sparkasse, consorsbank, deutschebank, commerzbank):
 
         skipperint=0 ## Skipperint is used to establish read in, even if transactions in the first 3 rows haven't been credited yet (date columuns have unusual string values)
         while skipperint<3:
@@ -182,7 +201,7 @@ def account_info_identifier(filepath):
         acctype_info='sparka_giro'
 
     elif 'mlptrio' in value:
-        acctype_info='mlp_triodos'
+        acctype_info='mlp_triodos_giro'
 
     else:
         acctype_info=value
