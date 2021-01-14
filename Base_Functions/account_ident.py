@@ -7,17 +7,14 @@ import locale
 import pandas as pd
 import platform
 import os
-import re
+
 
 
 if platform.system()=='Windows':
     locale.setlocale(locale.LC_ALL, 'German')
 
-elif platform.system()=='Darwin':
-    locale.setlocale(locale.LC_ALL, 'de_DE.utf-8')
 else:
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
-
 
 
 #necessary function to enable read-in even if singles dates are null values
@@ -194,11 +191,19 @@ def acc_type_tester(filepath):
     return (value,raw_data)
 
 ##function is only established to be able to control for errors with pandas data import values (i.e. if acc_type is recognized correctly)
-def account_info_identifier(filepath):
+def account_info_identifier(filepath,language_choice):
     
     value,raw_data=acc_type_tester(filepath)
     accinfo_dict=make_accinfo_dict()
-    
+
+    #set locale for data import
+    if language_choice=='eng':
+        if platform.system()=='Windows': #adjust locale if language choice is english
+            locale.setlocale(locale.LC_ALL, 'English')
+        else:
+            locale.setlocale(locale.LC_ALL, 'en_US.utf8')
+    else:
+        pass
     #this extra loop was chosen deliberatly, so that acctype_recognition_tester return subtype of sparkasse and mlp/triodos
     if 'sparka' in value:
         acctype_info='sparka_giro'

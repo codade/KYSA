@@ -4,7 +4,6 @@ This file really just builds the GUI with its subwindows. Main calculations are 
 import gi
 import os
 import sys
-import platform
 import webbrowser
 import random
 
@@ -12,6 +11,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, GLib, Pango
 from Base_Functions import GUIvars as guivar
 from Base_Functions import user_process as userproc
+
+
 
 #--------------------------------------Import style adaptions-----------------------------------
 
@@ -32,23 +33,29 @@ Gtk.StyleContext.add_provider_for_screen(
 #import supplementary data (icons and readmes)
 
 icon_name='KYSA-Icon_64.ico'
-readme_name='KYSA_Readme.html'
-license_name='KYSA_License.html'
-kysa_image="KYSA-Progress_pic.png"
+readme_name='KYSA_Readme_'+userproc.language_choice+'.html'
+license_name='KYSA_License_'+userproc.language_choice+'.html'
+kysa_image='KYSA-Progress_pic.png'
+copyright_pic='CRcode.png'
 
 if not hasattr(sys, "frozen"):
     iconfilepath= os.path.join(os.getcwd(),"suppldata", icon_name)
     readme_path= os.path.join(os.getcwd(),"suppldata", readme_name)
     license_path= os.path.join(os.getcwd(),"suppldata", license_name)
     kysaimagepath= os.path.join(os.getcwd(),"suppldata", kysa_image)
+    crpic_path=os.path.join(os.getcwd(),"suppldata", copyright_pic)#load to make sure png is present
 
 else:
     iconfilepath = os.path.join(sys.prefix,"suppldata", icon_name)
     readme_path= os.path.join(sys.prefix,"suppldata", readme_name)
     license_path= os.path.join(sys.prefix,"suppldata", license_name)
     kysaimagepath= os.path.join(sys.prefix,"suppldata", kysa_image)
-  
+    crpic_path=os.path.join(sys.prefix,"suppldata", copyright_pic)#load to make sure png is present
 
+#get language setting and import language dictionary
+open(crpic_path) #load to make sure png is present
+langdict_all=userproc.langdict_used #necessary extra variable definition for KYSA.py to get language information
+langdict_gui=langdict_all['GUI_Final_vars']
 
 
 
@@ -75,7 +82,8 @@ class Main_Window(Gtk.ApplicationWindow):
         self.proceed=False#necessary variable for window closing
         self.selection_counter=0#necessary for popup notices
 
-
+        copycode = Gtk.Image()
+        copycode.set_from_file(crpic_path)
 ######################################################### Menu Part #################################
 
       	#setup menubar and link to menu functions
@@ -88,7 +96,12 @@ class Main_Window(Gtk.ApplicationWindow):
         menubar.set_subtitle("Know Your Spendings")
         self.set_titlebar(menubar)
         
-        builder = Gtk.Builder.new_from_string(guivar.KYSA_XMLMenu, -1)
+        #load language specific menu
+        if userproc.language_choice=='eng':
+            builder = Gtk.Builder.new_from_string(guivar.KYSA_XMLMenu_eng, -1)
+        else:
+            builder = Gtk.Builder.new_from_string(guivar.KYSA_XMLMenu_deu, -1)
+
         menu = builder.get_object("KYSA-Menu")
 
         #menubutton in headerbar
@@ -96,7 +109,7 @@ class Main_Window(Gtk.ApplicationWindow):
         button.set_menu_model(menu)
         button.set_use_popover(False)#downward opening menubox
         button.set_direction(Gtk.ArrowType.DOWN)
-        icon = Gio.ThemedIcon.new("open-menu-symbolic")
+        icon = Gio.ThemedIcon.new("open-menu-symbolic") # include menu symbol
         image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(image)
         menubar.pack_start(button)
@@ -130,6 +143,10 @@ class Main_Window(Gtk.ApplicationWindow):
         act_resfolder.connect('activate', self.set_folders,'resdir')
         self.add_action(act_resfolder)
 
+        act_uisettings= Gio.SimpleAction.new('uiset', None)
+        act_uisettings.connect('activate', self.ui_settings)
+        self.add_action(act_uisettings)
+
         act_donate= Gio.SimpleAction.new('donate', None)
         act_donate.connect('activate', self.show_donate)
         self.add_action(act_donate)
@@ -155,19 +172,27 @@ class Main_Window(Gtk.ApplicationWindow):
 
         # Base_grid Box holds selections that can be chosen for xls and csv analysis
         base_grid = Gtk.Grid()
-        base_grid.set_column_spacing(170)
+
+        #language specific spacing between label and checkbox column
+        if userproc.language_choice=='eng':
+            base_grid.set_column_spacing(105)
+            csv_adjustvar=57
+        else:
+            base_grid.set_column_spacing(170)
+            csv_adjustvar=139.5
+
         base_grid.set_row_spacing(15)
         base_grid_cols=3
 
         #csv grid holds those user elective checkboxes that can only be run on csv-data
         csv_grid = Gtk.Grid()
-        csv_grid.set_column_spacing(base_grid.get_column_spacing()-140)
+        csv_grid.set_column_spacing(base_grid.get_column_spacing()-csv_adjustvar)
         csv_grid.set_row_spacing(15)
 
         #labels in grids
-        grid_l_lst=["Urlaube separat auswerten","Sparcents ausgeben","Daten zusammenfügen",#blank spacing entries necessary for column spacing
-                            "Csv-Daten mit bestehenden Excel-Dateien verknüpfen (Langzeitanalyse)",
-                            "Haushaltsbuch mit Bargeldzahlungen in die Datenanalyse einbeziehen"]
+        grid_l_lst=[langdict_gui['mainwin_choice3'][0],langdict_gui['mainwin_choice4'][0],langdict_gui['mainwin_choice5'][0],
+                            langdict_gui['mainwin_choice6'][0],
+                            langdict_gui['mainwin_choice7'][0]]
         
         #checkboxes in grids
         self.grid_chk_lst=[Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton()]
@@ -192,19 +217,20 @@ class Main_Window(Gtk.ApplicationWindow):
                 item[0].attach(self.grid_chk_lst[num], 1, num-item[1], 1, 1)
 
 
-        self.stack.add_titled(csv_grid, "csv_analyse", "Csv-Daten analysieren")
+        self.stack.add_titled(csv_grid, "csv_analyse", langdict_gui['mainwin_choice1'][0])
         
         xls_box = Gtk.Box()
-        self.stack.add_titled(xls_box, "xls_analyse", "Excel-Daten analysieren")
+        self.stack.add_titled(xls_box, "xls_analyse", langdict_gui['mainwin_choice2'][0])
         
         #separation between switch and base grid
         separator_label = Gtk.Label() 
-        separator_label.set_markup("<big>Weitere Analyse-Optionen</big>")
+        separator_label.set_markup(langdict_gui['mainwin_separator_text'][0])
         separator_label.set_name("separator_label")
         
         #create main window
         stack_switcher = Gtk.StackSwitcher() #Establish xls-csv-switch
         stack_switcher.set_stack(self.stack)
+        stack_switcher.set_halign(Gtk.Align.CENTER)
 
         #pack switch and selection boces
         main_box.pack_start(stack_switcher, False, True, 5) 
@@ -213,14 +239,14 @@ class Main_Window(Gtk.ApplicationWindow):
         main_box.pack_start(self.stack, True, False, 5)
         
         #browse files button
-        bws_btn = Gtk.Button.new_with_label("Rohdaten auswählen")
+        bws_btn = Gtk.Button.new_with_label(langdict_gui['mainwin_btn1'][0])
         bws_btn.connect("clicked", self.browse_files)
         bws_btn.set_name("bws_btn")
         bws_btn.set_size_request(0, 45)
         main_box.pack_start(bws_btn, False, False, 15)
         
         #start calculation button
-        run_btn = Gtk.Button.new_with_label("Auswertung starten")
+        run_btn = Gtk.Button.new_with_label(langdict_gui['mainwin_btn2'][0])
         run_btn.connect("clicked", self.run_program)
         run_btn.set_name("run_btn")
         run_btn.set_size_request(0, 55)
@@ -233,6 +259,8 @@ class Main_Window(Gtk.ApplicationWindow):
 
         self.mfunc=userproc.Main_Functions(self)#start main function with this window as master
 
+        if userproc.startcount==0:
+            uisettings_win=UISettings_Window(self) #start Language selection with first program start
 
 
 #_____________________________________________ subsection window/button functions_______________________________
@@ -252,7 +280,7 @@ class Main_Window(Gtk.ApplicationWindow):
             if userproc.startcount<2:
                 userproc.startcount+=1
                 if self.choice_dtype=='xls_analyse':
-                    userproc.message.info(self,'Bitte beachten:','Excel-Dateien, die ausgewertet werden sollen, müssen ein Tabellenblatt "Aufbereitete Daten" in der KYSA-eigenen Formatierung aufweisen. Wenn Sie bisher keine Daten ausgewertet haben, wählen Sie bitte "csv-Daten analysieren"!')
+                    userproc.message.info(self,langdict_gui['mainwin_xlsxinfo'][0],langdict_gui['mainwin_xlsxinfo'][1])
                 else:
                     pass
             else:
@@ -311,7 +339,7 @@ class Main_Window(Gtk.ApplicationWindow):
 
     def donate_popup(self):
         if userproc.startcount%7==0 or userproc.startcount%5==0:
-            userchoice=userproc.message.question(self,'Gefällt Ihnen KYSA?','KYSA ist als Open-Source-Projekt auf Ihre Unterstützung angewiesen. Für weitere Informationen drücken Sie bitte OK. Vielen Dank!')
+            userchoice=userproc.message.question(self,langdict_gui['mainwin_donatinfo'][0],langdict_gui['mainwin_donatinfo'][1])
             if userchoice:
                 donate_win=Donate_Window(self)
         else:
@@ -337,12 +365,12 @@ class Main_Window(Gtk.ApplicationWindow):
         aboutdialog.set_program_name("KYSA\nKnow Your Spendings Application")
         aboutdialog.set_copyright("\xa9 2020 Daniel Krezdorn")
         aboutdialog.set_authors(authors)
-        aboutdialog.set_version("v2.04")
+        aboutdialog.set_version("v3.01")
         aboutdialog.set_license_type(Gtk.License.BSD_3) #Changed to BSD 3 from BSD 2 (currently not suported by PyGobject version)
         aboutdialog.set_website("http://www.digital-souveraenitaet.de/kysa-")
-        aboutdialog.set_website_label("KYSA Webseite")
+        aboutdialog.set_website_label(langdict_gui['aboutwin_linktext'][0])
 
-        aboutdialog.set_title("Über KYSA")
+        aboutdialog.set_title(langdict_gui['aboutwin_title'][0])
         aboutdialog.show()
 
     def show_chglog(self,action, value):
@@ -353,10 +381,14 @@ class Main_Window(Gtk.ApplicationWindow):
         
         donate_win=Donate_Window(self)
 
+    def ui_settings(self,action, value):
+        
+        uisettings_win=UISettings_Window(self)
+
         
     def set_folders(self,action,value,purpose):
         if purpose=='classdir':
-            classtbl_success=self.mfunc.set_classtable('change') #link to classtable check function
+            classtbl_success=self.mfunc.set_classtable('change') #link to classtable check function; variable classtable_success necessary as functions returns value for user_process script
 
         elif purpose=='resdir':
             self.mfunc.filebrowser('resdir')
@@ -440,12 +472,12 @@ class Chglog_Window(Gtk.Window):
 
 #---------------------------------------Donation Window class--------------------------------------------
 
-#start extra window for changelog. Changlog entries are created in GUIVars file as loopable list
+#start extra window for donation info.
 
 class Donate_Window(Gtk.Window):
     def __init__(self,master):
 
-        Gtk.Window.__init__(self, title="Unterstützen")
+        Gtk.Window.__init__(self, title=langdict_gui['donatewin_header'][0])
 
         self.set_default_size(300, 50)
         self.set_resizable(False)
@@ -462,7 +494,7 @@ class Donate_Window(Gtk.Window):
 
         # main label header
         label_header= Gtk.Label() 
-        label_header.set_markup("<big>Spenden für KYSA</big>")
+        label_header.set_markup(langdict_gui['donatewin_title'][0])
         label_header.set_name("separator_label")
         main_box.pack_start(label_header,True,True,15)
 
@@ -470,7 +502,7 @@ class Donate_Window(Gtk.Window):
 
         
         
-        label_content=Gtk.Label(label="KYSA ist ein Open-Source-Projekt und soll es auch bleiben.\nAuch wenn es nicht so wirkt, ist auch die Entwicklung einer kleinen Software sehr zeitaufwändig  und trotz der Verwendung von anderen Open-Source-Programmbibliotheken dennoch mit Kosten verbunden.\n\n Wenn Ihnen KYSA gefällt und hilft, unterstützen Sie mich gerne mit einer kleinen Spende.  Ich freue mich auch über kleine Spenden, um dieses Programmprojekt weiter zu verbessern.  Als Dienstleister für Spenden (auch für meinen Blog) nutze ich die Open-Source-Spendenplattform Liberapay.  Alles weitere zum Spendenprozess findet sich auf der verlinkten Webseite: ")
+        label_content=Gtk.Label(label=langdict_gui['donatewin_text'][0])
 
         
         label_content.set_line_wrap_mode(Pango.WrapMode.WORD)
@@ -480,11 +512,206 @@ class Donate_Window(Gtk.Window):
         main_box.pack_start(label_content,True,True,10)  
         
 
-        label_link=Gtk.LinkButton.new_with_label("https://liberapay.com/Waldbader/donate","Spenden über Liberapay")
+        label_link=Gtk.LinkButton.new_with_label(langdict_gui['donatewin_link'][0],langdict_gui['donatewin_link'][1])
         main_box.pack_start(label_link,True,True,10)
 
         self.show_all()
 
+
+#start extra window for language settings
+
+class UISettings_Window(Gtk.Window):
+    def __init__(self,master):
+
+        Gtk.Window.__init__(self, title=langdict_gui['setuiwin_header'][0])
+
+        self.set_default_size(300, 50)
+        self.set_resizable(False)
+        self.set_size_request(300,50)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_transient_for(master)
+        self.set_modal(True)
+        self.master=master
+
+        self.counter=0
+        self.language=userproc.language_choice
+        self.currency=userproc.currency_var
+
+        #design part
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=5)
+        
+        self.add(main_box)
+
+        # main label title
+        label_header= Gtk.Label() 
+        label_header.set_markup(langdict_gui['setuiwin_title'][0])
+        label_header.set_name("separator_label")
+        label_header.set_padding(10,15)
+        main_box.pack_start(label_header,True,True,0)
+
+
+        hbox_grid = Gtk.Grid()
+        hbox_grid.set_row_spacing(20)
+        hbox_grid.set_column_spacing(50)
+        hbox_grid.set_row_homogeneous(False)
+        hbox_grid.set_column_homogeneous(False)
+        hbox_grid.set_halign(Gtk.Align.CENTER)
+
+        label_lang=Gtk.Label()
+        label_lang.set_markup(langdict_gui['setuiwin_choicelabel'][0])
+        label_lang.set_halign(Gtk.Align.CENTER)
+        hbox_grid.attach(label_lang, 0, 0, 1, 1)
+
+        label_curr=Gtk.Label()
+        label_curr.set_markup(langdict_gui['setuiwin_choicelabel'][1])
+        label_curr.set_halign(Gtk.Align.CENTER)
+        hbox_grid.attach(label_curr, 1, 0, 1, 1)
+
+        
+
+        vbox_lang = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=6)
+        vbox_curr = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=6)
+
+###################################### Language Radiobutton Part #################################    
+
+        #radiobuttons for language selection
+        button_deu = Gtk.RadioButton.new_with_label_from_widget(None, "Deutsch")
+        button_deu.connect("toggled", self.lang_button_toggled, "deu")
+        vbox_lang.pack_start(button_deu, True, True, 0)
+
+        self.button_eng = Gtk.RadioButton.new_from_widget(button_deu)
+        self.button_eng.set_label("English")
+        self.button_eng.connect("toggled", self.lang_button_toggled, "eng")
+        vbox_lang.pack_start(self.button_eng, True, True, 0)
+        
+        vbox_lang.set_halign(Gtk.Align.CENTER)
+        vbox_lang.set_valign(Gtk.Align.CENTER)
+        
+        
+
+###################################### Currency Radiobutton Part #################################    
+
+        #radiobuttons for currency selection
+        #Euro
+        button_euro = Gtk.RadioButton.new_with_label_from_widget(None, langdict_gui['setuiwin_currencies1'][0])
+        button_euro.connect("toggled", self.curr_button_toggled, "€")
+        vbox_curr.pack_start(button_euro, True, True, 0)
+
+        #Dollar
+        self.button_dollar = Gtk.RadioButton.new_from_widget(button_euro)
+        self.button_dollar.set_label(langdict_gui['setuiwin_currencies1'][1])
+        self.button_dollar.connect("toggled", self.curr_button_toggled, "$")
+        vbox_curr.pack_start(self.button_dollar, True, True, 0)
+
+        #Pound
+        self.button_pound = Gtk.RadioButton.new_from_widget(button_euro)
+        self.button_pound.set_label(langdict_gui['setuiwin_currencies2'][0])
+        self.button_pound.connect("toggled", self.curr_button_toggled, "£")
+        vbox_curr.pack_start(self.button_pound, True, True, 0)
+
+        #Krone
+        self.button_krone = Gtk.RadioButton.new_from_widget(button_euro)
+        self.button_krone.set_label(langdict_gui['setuiwin_currencies2'][1])
+        self.button_krone.connect("toggled", self.curr_button_toggled, "Kr")
+        vbox_curr.pack_start(self.button_krone, True, True, 0)
+        
+        vbox_curr.set_halign(Gtk.Align.CENTER)
+
+        hbox_grid.attach(vbox_lang, 0, 1, 1, 1)
+
+        hbox_grid.attach(vbox_curr, 1, 1, 1, 1)
+
+        
+        ################# Save Preferences Button#####
+
+        save_btn = Gtk.Button.new_with_label(langdict_gui['setuiwin_btn'][0])
+        save_btn.connect("clicked", self.save_prefs)
+        save_btn.set_size_request(0, 40)
+        hbox_grid.attach(save_btn, 0, 2, 2, 1)
+
+
+        main_box.pack_start(hbox_grid,True,True,10)
+        
+        if self.counter==0:
+            self.get_saved_prefs()
+
+        self.show_all()
+
+    def save_prefs(self, widget):
+
+        closeproc_choice=False #necessary for automated program closure
+
+
+        if self.counter>2:
+            #user changed selection
+            closeproc_choice=userproc.message.question(self,langdict_gui['setuiwin_newchoice'][0],langdict_gui['setuiwin_newchoice'][1])
+
+            #save preferences whenever a new choice was selected
+            userproc.language_choice=self.language
+            userproc.currency_var=self.currency
+
+        else:
+            #no user selection
+            userproc.message.info(self,langdict_gui['setuiwin_nochoice'][0],langdict_gui['setuiwin_nochoice'][1])
+
+        #adjust startcount necessary for UI window popup with very first program start  
+        userproc.startcount+=1 
+        
+        #close program if user pressed ok
+        if closeproc_choice:
+            self.close()
+            self.master.close()
+        else:
+            self.close()
+
+    def get_saved_prefs(self):
+        #turn buttons on based on saved value in prefs file
+
+        #language preset
+        if self.language=='eng':
+            self.button_eng.set_active(True)
+        else:
+            #pass
+            self.counter+=1 #set self.counter according to preeselection of language to display language switch notification correctly
+            
+        
+        #currency preset
+        if self.currency=='$':
+            self.button_dollar.set_active(True)
+
+        elif self.currency=='£':
+            self.button_pound.set_active(True)
+
+        elif self.currency=='Kr':
+            self.button_krone.set_active(True)
+
+        else:
+            #pass
+            self.counter+=1 #set self.counter according to preeselection of language to display language switch notification correctly
+        #self.counter=1
+            
+
+    def curr_button_toggled(self, button, curr):
+
+        if button.get_active():
+            self.currency=curr
+            self.counter+=1
+        else:
+            pass #buttons turned off
+
+
+
+    def lang_button_toggled(self, button, lang):
+        #get the language changes
+        if button.get_active():
+            self.language=lang #button turned on save language choice to pref variable
+            self.counter+=1
+        else:
+            pass #button turned off
+  
+
+
+        
 
 #---------------------------------------Concat Window class--------------------------------------------
 
@@ -496,7 +723,7 @@ class Concat_Window(Gtk.Window):
     def __init__(self,input_list):
         
 
-        Gtk.Window.__init__(self, title="Daten-Zusammenführung")
+        Gtk.Window.__init__(self, title=langdict_gui['concatwin_header'][0])
         
         self.set_border_width(15)
         self.connect("delete_event", self.close_window)
@@ -531,12 +758,12 @@ class Concat_Window(Gtk.Window):
         
         #buttons
         #cancel concatenation
-        btn_nogo = Gtk.Button.new_with_label("Abbrechen")
+        btn_nogo = Gtk.Button.new_with_label(langdict_gui['concatwin_btn1'][0])
         btn_nogo.connect("clicked",self.close_window,'btn')
         bt_box.pack_start(btn_nogo, True, True, 20)
         
         # continue button
-        btn_go = Gtk.Button.new_with_label("Weiter")
+        btn_go = Gtk.Button.new_with_label(langdict_gui['concatwin_btn2'][0])
         btn_go.connect("clicked",self.proceed_analysis)
         bt_box.pack_start(btn_go, True, True, 20)
     
@@ -570,7 +797,7 @@ class Concat_Window(Gtk.Window):
            
             #display label for respective entrybox of new file
             label_entry=Gtk.Label()
-            label_entry.set_markup(f"<b>Name für Datei {(colid+1)}:</b>")
+            label_entry.set_markup(eval(f"f'''{langdict_gui['concatwin_entryname'][0]}'''"))#eval function transforms f-string statements to be interpreted as f-strings
             label_entry.set_xalign(0) #styling
             chk_grid.attach(label_entry, 0, self.rows+colid+2, 1, 1)
             
@@ -586,7 +813,7 @@ class Concat_Window(Gtk.Window):
             for rowid in range(self.rows):
                 
                 #label of respective new file (file 1, file 2). The real name has to be set by user via entrybox 
-                label_data = Gtk.Label.new(f"Datei {colid+1}")
+                label_data = Gtk.Label.new(eval(f"f'''{langdict_gui['concatwin_choicename'][0]}'''"))#eval function transforms f-string statements to be interpreted as f-strings
                 chk_grid.attach(label_data, colid+1, 0, 1, 1)
                 
                 #display names of datasets to be merged
@@ -692,16 +919,16 @@ class Concat_Window(Gtk.Window):
         #messages before continuation
         
         if checklist[0]==[]:
-            userproc.message.error(self,'Unvollständige Eingabe','Bitte wählen Sie mindestens 2 Dateien aus\noder brechen diesen Schritt ab!')
+            userproc.message.error(self,langdict_gui['concatwin_errselect'][0],langdict_gui['concatwin_errselect'][1])
 
         elif missingname==1:
-            userproc.message.error(self,'Unvollständige Eingabe','Sie haben für Ihre Auswahl keinen Namen eingegeben!')
+            userproc.message.error(self,langdict_gui['concatwin_errnoname'][0],langdict_gui['concatwin_errnoname'][1])
             
         elif 'errorname' in namelist:
-            userproc.message.error(self,'Fehlerhafte Eingabe','Sie haben einen Namen eingegeben, der bereits vergeben ist!')
+            userproc.message.error(self,langdict_gui['concatwin_errname'][0],langdict_gui['concatwin_errname'][1])
         else:
             if not self.concat_list==[]:
-                userproc.message.info(self,'Erfolgreiche Verknüpfungsauwahl!','')
+                userproc.message.info(self,langdict_gui['concatwin_succ'][0],langdict_gui['concatwin_succ'][1])
                 self.proceed=True
                 self.close()
 
@@ -713,7 +940,7 @@ class Concat_Window(Gtk.Window):
 
 class ProgressBarWindow(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self, title='Datenaufbereitung läuft')
+        Gtk.Window.__init__(self, title=langdict_gui['prgrsswin_header'][0])
 
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
@@ -765,7 +992,7 @@ class ProgressBarWindow(Gtk.Window):
         elif msg=='process_start':
             self.activity_mode=False
             userproc.message.info(self,title1,title2)
-            self.set_title('Datenvisualisierung läuft')
+            self.set_title(langdict_gui['prgrsswin_visualinfo'][0])
             self.activity_mode=True
         elif msg=='process_end':
             self.activity_mode=False

@@ -1,11 +1,13 @@
 
 '''This file holds all relevant functions necessary for starting the data analysis.
 An object class for all account data is established, which will hold the raw data after import,
-the processed data and all subdata configuration necessary for plotting. If desired credit data is also integrated. 
-Currently it is only working for comdirect bank data. Further work towards integrating other banks will be done. Excel file is exported at the end exported.'''
+the processed data and all subdata configuration necessary for plotting. 
+The account data is provided through the account identification process in account_ident.py
+Necessary functions for holiday extraction, roundies calculation as well as merging and cashbook linkage are provided in the Accounts class
+Excel file is exported at the end exported.'''
 
 
-from Base_Functions import acc_testscript
+from Base_Functions import account_ident
 import numpy as np
 import pandas as pd
 import platform
@@ -16,11 +18,13 @@ import re
 
 
 if platform.system()=='Windows':
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, 'German')
     folder_sep='\\'
+
 elif platform.system()=='Darwin':
-    locale.setlocale(locale.LC_ALL, '')
-    folder_sep='/'    
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf-8')
+    folder_sep='/'
+
 else:
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
     folder_sep='/'
@@ -28,48 +32,29 @@ else:
 
 
 
-dateparser_capy = lambda x: datetime.datetime.strptime(x, "%d.%m.%Y")
-dateparser_lowy= lambda x: datetime.datetime.strptime(x, "%d.%m.%y")
-
-
-class Classifier:
-
-    def __init__(self,class_dir):
-    #parent_dir=os.path.abspath(os.getcwd()+'/..')
-        self.dict_giro=pd.read_excel(class_dir+folder_sep+'Zuordnungstabelle.xlsx',engine='openpyxl',sheet_name='Girokonto',index_col=0)['Kategorie'].to_dict()
-        self.dict_credit=pd.read_excel(class_dir+folder_sep+'Zuordnungstabelle.xlsx',engine='openpyxl',sheet_name='Kreditkarte',index_col=0)['Kategorie'].to_dict()
-
-    ## data categorizer. dictionaries are used to get keys to search for and corresponding categories
-    def categorizer(self,dicttype,string):
-        
-        if dicttype=='credit':
-            dictuse=self.dict_credit
-        else:
-            dictuse=self.dict_giro
-
-        for key in dictuse.keys():
-            if re.findall(key,string):
-                return dictuse[key]
-        else:
-            return 'Sonstiges'
-
-    def categorize_data(self,dicttype,data):
-        data["lowtext"]=data['text'].apply(lambda text: ''.join(text.lower().split()))  ## create auxiliary column with scanable text
-        data["cat"]=data['lowtext'].apply(lambda text: self.categorizer(dicttype,text))  ## do categorization
-        data.drop("lowtext",axis=1,inplace=True)                                        ## get rid of auxiliary column
-        
-        return data
-
-
-
 class Accounts_Data:
 
-    def __init__(self,res_dir,classtable):
+    def __init__(self,res_dir,classifier_class,langdict):
 
+        self.langdict=langdict
+
+        ## set language variable
+        if self.langdict['result_pathvars'][0]=='Ergebnisse_':
+            self.lang_choice='deu'
+        else:
+            self.lang_choice='eng'
+            #change locale to English
+            if platform.system()=='Windows':
+                locale.setlocale(locale.LC_ALL, 'English')
+            elif platform.system()=='Darwin':
+                locale.setlocale(locale.LC_ALL, 'en_US.utf-8')
+            else:
+                locale.setlocale(locale.LC_ALL, 'en_US.utf8')
+        
         self.current_date=datetime.datetime.now().strftime("%b'%y")
         self.imported_csv_acctypes={}
         self.folder_sep=folder_sep       
-        self.res_dir=res_dir+folder_sep+'Ergebnisse_'+self.current_date+self.folder_sep #adjusted complete path
+        self.res_dir=res_dir+folder_sep+self.langdict['result_pathvars'][0]+self.current_date+self.folder_sep #adjusted complete path
         self.folder_res={}
         self.raw_data={}
         self.raw_data_header={}
@@ -78,7 +63,11 @@ class Accounts_Data:
         self.cat_data={}
         self.plotting_list={}
         self.error_codes={}
-        self.classifier=classtable
+        self.classifier=classifier_class
+
+
+            
+        
 
     def process_data(self,raw_fileinfo,import_type):
         
@@ -93,7 +82,7 @@ class Accounts_Data:
             #get account information
             while True:
                 try:
-                    account_infos,raw_data,acctype=acc_testscript.account_info_identifier(filepath)
+                    account_infos,raw_data,acctype=account_ident.account_info_identifier(filepath,self.lang_choice)
                 except:
                     self.error_codes[filename]='Err01'
                     break
@@ -108,6 +97,8 @@ class Accounts_Data:
                     #select Euro entrys
                     if "Währung" in header_columns:
                         self.basis_data[filename]=self.raw_data[filename][self.raw_data[filename]["Währung"]=="EUR"].copy()
+                    elif "currency" in header_columns:# 
+                        self.basis_data[filename]=self.raw_data[filename][self.raw_data[filename]["currency"]=="EUR"].copy()
                     else:
                         self.basis_data[filename]=self.raw_data[filename].copy()
 
@@ -126,7 +117,7 @@ class Accounts_Data:
 
                     ##insert "act" column if necessary (currently only dkb_credit)
                     if len(self.basis_data[filename].columns)==4:
-                        self.basis_data[filename].insert(2,'act','Kreditkartenumsatz')
+                        self.basis_data[filename].insert(2,'act',self.langdict['act_value'][0])
                     else:
                         pass
 
@@ -166,7 +157,7 @@ class Accounts_Data:
 
             #read excel
             try:
-                raw_data=pd.read_excel(filepath,sheet_name='Aufbereitete Daten', engine='openpyxl')
+                raw_data=pd.read_excel(filepath,sheet_name=self.langdict['sheetname_basis'][0], engine='openpyxl')
                 raw_data.columns=["time1","time2","act","text","val",'month','cat']
                 raw_data.dropna(subset=['time1','val'],inplace=True)
                 
@@ -185,7 +176,7 @@ class Accounts_Data:
 
             #Longterm analysis: Read-in excel to concat csvs
             try:
-                raw_data=pd.read_excel(filepath,sheet_name='Aufbereitete Daten', engine='openpyxl')
+                raw_data=pd.read_excel(filepath,sheet_name=self.langdict['sheetname_basis'][0], engine='openpyxl')
                 raw_data.columns=["time1","time2","act","text","val",'month','cat']
                 raw_data.dropna(subset=['time1','val'],inplace=True)
                 
@@ -203,10 +194,9 @@ class Accounts_Data:
 
             #cashbok analysis: Read-in to append info to csvs
             try:
-                raw_data=pd.read_excel(filepath,sheet_name='Haushaltsbuch', engine='openpyxl')
+                raw_data=pd.read_excel(filepath,sheet_name=self.langdict['cashbookvars_name'][0],usecols=[0,1,2,3,4,5], engine='openpyxl')
                 raw_data.columns=["time1","text","val","cat","acctype","cashcat"]
                 raw_data=raw_data[raw_data['time1'].isna()==False]
-                
                 #adjust categories if no value is set    
                 raw_data['cat']=raw_data[["text",'cat']].apply(lambda dataitem: self.classifier.categorizer('giro',''.join(dataitem['text'].lower().split())) if dataitem['cat'] is np.nan else dataitem['cat'],axis=1)
                 
@@ -215,9 +205,9 @@ class Accounts_Data:
                     raw_data['val']=-raw_data['val']
                     raw_data["time2"]=raw_data["time1"]
                     raw_data['month']=raw_data['time1'].apply(lambda dates: dates.strftime('%b %Y'))
-                    raw_data['act']='Bargeldzahlung'
+                    raw_data['act']=self.langdict['cashbookvars_name'][1]
                     raw_data=raw_data.reindex(columns=raw_data.columns[[0,6,8,1,2,7,3,4,5]])
-                    self.basis_data['Haushaltsbuch']=raw_data.copy()
+                    self.basis_data[self.langdict['cashbookvars_name'][0]]=raw_data.copy()
                 else:
                     self.error_codes[filename]='Err01'
             except:
@@ -248,26 +238,26 @@ class Accounts_Data:
     
     def bundle_holiday(self):
         #concat holiday data from different csv-files
-        
-        self.basis_data['Urlaube']=pd.DataFrame(columns=["time1","time2","act","text","val","month","cat"])
+        holidayvar_name=self.langdict['holidayvars_name'][0]
+        self.basis_data[holidayvar_name]=pd.DataFrame(columns=["time1","time2","act","text","val","month","cat"])
         for element_name in list(self.folder_res.keys()):
-            if not (element_name=='Sparcents' or element_name=='Haushaltsbuch'):
-                data_hol=self.basis_data[element_name].loc[self.basis_data[element_name]['cat'].str.contains('Urlaub')].copy()
-                self.basis_data['Urlaube']=self.basis_data['Urlaube'].append(data_hol,ignore_index=True)
+            if not (element_name==self.langdict['dataname_savecent'][0] or element_name==self.langdict['cashbookvars_name'][0]): #cashbook and savecentnames
+                data_hol=self.basis_data[element_name].loc[self.basis_data[element_name]['cat'].str.contains(self.langdict['holiday_searchwords'][0])].copy()
+                self.basis_data[holidayvar_name]=self.basis_data[holidayvar_name].append(data_hol,ignore_index=True)
         
-        if len(self.basis_data['Urlaube'].index)>0:
-            self.basis_data['Urlaube']=self.basis_data['Urlaube'].sort_values(['time1'],ascending=False)
-            self.folder_res['Urlaube']=self.res_dir+'Urlaubsauswertung'
-            self.plotting_list['Urlaube']='basic'
+        if len(self.basis_data[holidayvar_name].index)>0:
+            self.basis_data[holidayvar_name]=self.basis_data[holidayvar_name].sort_values(['time1'],ascending=False)
+            self.folder_res[holidayvar_name]=self.res_dir+self.langdict['holidayvars_name'][1]
+            self.plotting_list[holidayvar_name]='basic'
         else:
-            del self.basis_data['Urlaube']
+            del self.basis_data[holidayvar_name]
 
   
     def month_cat_maker(self):
         
         ##categorize data and sort ascending. Same goes for monthly data
         for element_name in list(self.folder_res.keys()):
-            if not (element_name=='Sparcents' or element_name=='Haushaltsbuch'):
+            if not (element_name==self.langdict['dataname_savecent'][0] or element_name==self.langdict['cashbookvars_name'][0]): #cashbook and savecent names
                 basis_data_subset=self.basis_data[element_name].copy()
 
                 #make month data
@@ -277,7 +267,7 @@ class Accounts_Data:
                 #process data and aggregate based on category
                 cat_intermediate=basis_data_subset.groupby('cat')['val'].sum().reset_index()
                             
-                hilfs=pd.DataFrame([['Gesamtsaldo\nder Periode', sum(basis_data_subset['val'])]],columns=list(cat_intermediate.columns))
+                hilfs=pd.DataFrame([[self.langdict['balance_normal'][0], sum(basis_data_subset['val'])]],columns=list(cat_intermediate.columns))
                 cat_intermediate=cat_intermediate.sort_values(['val'],ascending=False).reset_index(drop=True)
                 cat_data=cat_intermediate.loc[(cat_intermediate['val']>0)].copy()
 
@@ -295,46 +285,47 @@ class Accounts_Data:
     
     def savecent_calculation(self):
         #account for difference between actucal cost value and full amount (rounding). Gives a number which can be invested every month. Since the data structure will be different, the results will be saved and plotted separately.
-
-        self.basis_data['Sparcents']=pd.DataFrame(columns=["time1","time2","act","text","val","month","cat","savecent","acc_origin"])
+        savecentvar_name=self.langdict['dataname_savecent'][0]
+        self.basis_data[savecentvar_name]=pd.DataFrame(columns=["time1","time2","act","text","val","month","cat","savecent","acc_origin"])
         #get data from every imported csv and do savecent calculation
         for element_name in list(self.folder_res.keys()):
-            if not (element_name=='Urlaube' or element_name=='Haushaltsbuch'):
+            if not (element_name==self.langdict['holidayvars_name'][0] or element_name==self.langdict['cashbookvars_name'][0]): #cashbook and holiday names
                 savecent_subset=self.basis_data[element_name].loc[self.basis_data[element_name]['val']<0].copy()
                 savecent_subset['savecent']=np.ceil(savecent_subset['val'].abs())+savecent_subset['val']
                 savecent_subset['acc_origin']=element_name
-                self.basis_data['Sparcents']=self.basis_data['Sparcents'].append(savecent_subset,ignore_index=True)
+                self.basis_data[savecentvar_name]=self.basis_data[savecentvar_name].append(savecent_subset,ignore_index=True)
 
-        if len(self.basis_data['Sparcents'].index)>0:
-            self.basis_data['Sparcents']=self.basis_data['Sparcents'].sort_values(['time1'],ascending=False)
-            self.folder_res['Sparcents']=self.res_dir+'Sparcents'
-            self.plotting_list['Sparcents']='basic'
+        if len(self.basis_data[savecentvar_name].index)>0:
+            self.basis_data[savecentvar_name]=self.basis_data[savecentvar_name].sort_values(['time1'],ascending=False)
+            self.folder_res[savecentvar_name]=self.res_dir+savecentvar_name
+            self.plotting_list[savecentvar_name]='basic'
 
             ## do monthly accumulation and grouping by acc_origin
             #prepare set
-            savecent_set=self.basis_data['Sparcents'].copy()
+            savecent_set=self.basis_data[savecentvar_name].copy()
             savecent_set['val']=savecent_set['savecent']
             savecent_set['cat']=savecent_set['acc_origin']
             savecent_set.drop(savecent_set.columns[[7,8]],axis=1,inplace=True)
 
             #group by month
-            self.month_data['Sparcents']=savecent_set.groupby('month',sort=False)['val'].sum().reset_index() ##get monthly overview
-            self.month_data['Sparcents']=self.month_data['Sparcents'].sort_values(['val'],ascending=False) ##sort monthly data
+            self.month_data[savecentvar_name]=savecent_set.groupby('month',sort=False)['val'].sum().reset_index() ##get monthly overview
+            self.month_data[savecentvar_name]=self.month_data[savecentvar_name].sort_values(['val'],ascending=False) ##sort monthly data
 
             #group by account-origin ("category")
 
             savecent_cat=savecent_set.groupby('cat',sort=False)['val'].sum().reset_index() ##get monthly overview
             savecent_cat=savecent_cat.sort_values(['val'],ascending=False) ##sort monthly data
-            savecent_cat=savecent_cat.append(pd.DataFrame([['Gesamtsumme der\nSparcents',sum(savecent_set['val'])]],columns=list(savecent_cat.columns)),ignore_index=True)
-            savecent_cat['val_month']=savecent_cat['val']/(self.month_data['Sparcents']['month'].nunique())
-            self.cat_data['Sparcents']=savecent_cat
+            savecent_cat=savecent_cat.append(pd.DataFrame([[self.langdict['balance_savecent'][0],sum(savecent_set['val'])]],columns=list(savecent_cat.columns)),ignore_index=True)
+            savecent_cat['val_month']=savecent_cat['val']/(self.month_data[savecentvar_name]['month'].nunique())
+            self.cat_data[savecentvar_name]=savecent_cat
         else:
-            del self.basis_data['Sparcents']
+            del self.basis_data[savecentvar_name]
 
 
     def cashbook_calculation(self):
     #Preparations
-        cashbook_subset=self.basis_data['Haushaltsbuch'].copy()
+        cashbook_name=self.langdict['cashbookvars_name'][0]
+        cashbook_subset=self.basis_data[cashbook_name].copy()
         #reformat acctype names for further processing
         accounts_list={"Comdirect Giro":'comdirect_giro',"Comdirect Kredit":'comdirect_credit',"DKB Giro":'dkb_giro',"DKB Kredit":'dkb_credit',"Triodos Giro":'mlp_triodos_giro',"Apobank Giro":'apobank_giro',"Sparkasse Giro":'sparka_giro',"Consorsbank Giro":'consors_giro',"Commerzbank Giro":'commerz_giro',"Deutsche Bank Giro":'deutsche_giro',"MLP Giro":'mlp_triodos_giro'}
         for item in list(accounts_list.keys()):
@@ -363,7 +354,7 @@ class Accounts_Data:
                         try:
                             subframe_append=subframe[(subframe['cashcat']==item)&(subframe["time1"].between(start_date,end_date))].copy()
                             subframe_append.drop(subframe_append.columns[[7,8]],axis=1,inplace=True)
-                            subframe_sum=pd.DataFrame([[subframe_append['time1'].iloc[0],subframe_append['time2'].iloc[0],"Bargeldzahlung","Summe der berücksichtigten Haushaltsbuchkosten in der Periode",abs(sum(subframe_append['val'])),subframe_append['month'].iloc[0],item]],columns=list(subframe_append.columns))
+                            subframe_sum=pd.DataFrame([[subframe_append['time1'].iloc[0],subframe_append['time2'].iloc[0],self.langdict['cashbookvars_name'][1],self.langdict['balance_cashbook'][0],abs(sum(subframe_append['val'])),subframe_append['month'].iloc[0],item]],columns=list(subframe_append.columns))
                             subframe_append=subframe_append.append(subframe_sum,ignore_index=True)
                             element_cashappend= element_cashappend.append(subframe_append,ignore_index=True)
                             cashbook_successlist.append(element_name)
@@ -387,31 +378,31 @@ class Accounts_Data:
         #prepare cashbook entries for plotting
         #group by month
         #change back acc types:
-        self.basis_data['Haushaltsbuch']['val']=-self.basis_data['Haushaltsbuch']['val']
-        cashbook_plotsubset=self.basis_data['Haushaltsbuch'].copy()
-        self.month_data['Haushaltsbuch']=cashbook_plotsubset.groupby('month',sort=False)['val'].sum().reset_index() ##get monthly overview
-        self.month_data['Haushaltsbuch']=self.month_data['Haushaltsbuch'][::-1] ##sort monthly data
+        self.basis_data[cashbook_name]['val']=-self.basis_data[cashbook_name]['val']
+        cashbook_plotsubset=self.basis_data[cashbook_name].copy()
+        self.month_data[cashbook_name]=cashbook_plotsubset.groupby('month',sort=False)['val'].sum().reset_index() ##get monthly overview
+        self.month_data[cashbook_name]=self.month_data[cashbook_name][::-1] ##sort monthly data
 
         #create cat data and join it together
         sum_cashbook=cashbook_plotsubset['val'].sum()
         #first categorical subset sorted by categories
         cat4plot_1=cashbook_plotsubset.groupby('cat',sort=False)['val'].sum().abs().reset_index().copy() ##get monthly overview
         cat4plot_1=cat4plot_1.sort_values(['val'],ascending=False) ##sort monthly data
-        cat4plot_1=cat4plot_1.append(pd.DataFrame([['Gesamtsumme der\nBargeldzahlungen',sum_cashbook]],columns=list(cat4plot_1.columns)),ignore_index=True)
-        cat4plot_1['val_month']=cat4plot_1['val']/(self.month_data['Haushaltsbuch']['month'].nunique())
+        cat4plot_1=cat4plot_1.append(pd.DataFrame([[self.langdict['balance_cashbook'][1],sum_cashbook]],columns=list(cat4plot_1.columns)),ignore_index=True)
+        cat4plot_1['val_month']=cat4plot_1['val']/(self.month_data[cashbook_name]['month'].nunique())
         #second categorical subset sorted by cash categories
         cat4plot_2=cashbook_plotsubset.groupby("cashcat",sort=False)['val'].sum().abs().reset_index()
         cat4plot_2=cat4plot_2.sort_values(['val'],ascending=False)
-        cat4plot_2=cat4plot_2.append(pd.DataFrame([['Gesamtsumme der\nBargeldzahlungen',sum_cashbook]],columns=list(cat4plot_2.columns)),ignore_index=True)
-        cat4plot_2['val_month']=cat4plot_2['val']/(self.month_data['Haushaltsbuch']['month'].nunique())
+        cat4plot_2=cat4plot_2.append(pd.DataFrame([[self.langdict['balance_cashbook'][1],sum_cashbook]],columns=list(cat4plot_2.columns)),ignore_index=True)
+        cat4plot_2['val_month']=cat4plot_2['val']/(self.month_data[cashbook_name]['month'].nunique())
         cat4plot_2.columns=["cashcat","val_2","val_month_2"]
         #join both subsets on the left side
         cat4plot_join=pd.concat([cat4plot_1, cat4plot_2],axis=1)#integrate two empty columns
         
 
-        self.cat_data['Haushaltsbuch']=cat4plot_join
-        self.folder_res['Haushaltsbuch']=self.res_dir+'Haushaltsbuch'
-        self.plotting_list['Haushaltsbuch']='basic'
+        self.cat_data[cashbook_name]=cat4plot_join
+        self.folder_res[cashbook_name]=self.res_dir+cashbook_name
+        self.plotting_list[cashbook_name]='basic'
         return (cashbook_errorlist,cashbook_successlist)
 
         
@@ -428,33 +419,39 @@ class Accounts_Data:
                     os.makedirs(result_dir)
             except OSError:
                 print ('Error: Creating directory. ' +  result_dir)
-            writer_excel = pd.ExcelWriter(result_dir+self.folder_sep+element_name+'_Auswertung.xlsx', engine='openpyxl',datetime_format="dd.mm.yyyy")
+
+            #set excel writer depending on language choice
+            if self.lang_choice=='deu': #german date format
+                writer_excel = pd.ExcelWriter(result_dir+self.folder_sep+element_name+self.langdict['result_pathvars'][1]+'.xlsx', engine='openpyxl',datetime_format="dd.mm.yyyy")
+
+            else:#english date format
+                writer_excel = pd.ExcelWriter(result_dir+self.folder_sep+element_name+self.langdict['result_pathvars'][1]+'.xlsx', engine='openpyxl')
 
             if element_name in self.raw_data:
-                self.raw_data[element_name].to_excel(writer_excel,sheet_name='Rohdaten',index=False,header=self.raw_data_header[element_name])
+                self.raw_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetname_rawdata'][0],index=False,header=self.raw_data_header[element_name])
             else:#no action needed
                 pass
 
-            if element_name=='Sparcents':
-                self.basis_data[element_name].to_excel(writer_excel,sheet_name='Aufbereitete Daten',index=False,header=["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungsinformationen","Umsatzbetrag in EUR","Monat","Kategorie","Sparcents in EUR","Herkunft Sparcent"])
-                self.month_data[element_name].to_excel(writer_excel,sheet_name="Monatliche Sparcents",index=False,header=["Monat","Sparcents in EUR"])
-                self.cat_data[element_name].to_excel(writer_excel,sheet_name='Sparcents nach Konto-Herkunft',index=False,header=["Herkunft Sparcent","Kumulierte Sparcents (€)","Durchschnittliche Sparcents pro Monat (€)"])
+            if element_name==self.langdict['dataname_savecent'][0]:
+                self.basis_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetnames_savecent1'][0],index=False,header=self.langdict['sheetnames_savecent1'][1])
+                self.month_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetnames_savecent2'][0],index=False,header=self.langdict['sheetnames_savecent2'][1])
+                self.cat_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetnames_savecent3'][0],index=False,header=self.langdict['sheetnames_savecent3'][1])
 
-            elif element_name=='Haushaltsbuch':
+            elif element_name==self.langdict['cashbookvars_name'][0]:
                 
-                self.basis_data[element_name].to_excel(writer_excel,sheet_name='Aufbereitete Daten',index=False,header=["Buchungstag","Wertstellung (Valuta)", "Vorgang", "Buchungsinformationen", "Umsatzbetrag in EUR","Monat","Kategorie", "Konto", "Bargeldbezeichnung"])
+                self.basis_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetnames_cashbook1'][0],index=False,header=self.langdict['sheetnames_cashbook1'][1])
                 #disintregate cat data
                 cashbook_cats=self.cat_data[element_name].copy()
                 cashbook_cats1=cashbook_cats[cashbook_cats.columns[[0,1,2]]]
                 cashbook_cats2=cashbook_cats[cashbook_cats.columns[[3,4,5]]]
                 #export cat data
-                cashbook_cats1.to_excel(writer_excel,sheet_name='Aufstellung Kategorien',index=False,header=["Kategorie","Kumulierte Absolutbeträge (€)","Durchschnittliche Absolutbeträge pro Monat (€)"])
-                cashbook_cats2.to_excel(writer_excel,sheet_name='Aufstellung Bargeldherkunft',index=False,header=["Bezeichnung Bargeldherkunft","Kumulierte Absolutbeträge (€)","Durchschnittliche Absolutbeträge pro Monat (€)"])
+                cashbook_cats1.to_excel(writer_excel,sheet_name=self.langdict['sheetnames_cashbook2'][0],index=False,header=self.langdict['sheetnames_cashbook2'][1])
+                cashbook_cats2.to_excel(writer_excel,sheet_name=self.langdict['sheetnames_cashbook3'][0],index=False,header=self.langdict['sheetnames_cashbook3'][1])
                
                 
 
             else:
-                self.basis_data[element_name].to_excel(writer_excel,sheet_name='Aufbereitete Daten',index=False,header=["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungsinformationen","Umsatzbetrag in EUR","Monat","Kategorie"])
-                self.cat_data[element_name].to_excel(writer_excel,sheet_name='Aufstellung Kategorien',index=False,header=["Kategorie","Kumulierte Absolutbeträge (€)","Durchschnittliche Absolutbeträge pro Monat (€)"])
+                self.basis_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetname_basis'][0],index=False,header=self.langdict['sheetname_basis'][1])
+                self.cat_data[element_name].to_excel(writer_excel,sheet_name=self.langdict['sheetname_catdata'][0],index=False,header=self.langdict['sheetname_catdata'][1])
      
             writer_excel.save()

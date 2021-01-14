@@ -10,6 +10,8 @@ from gi.repository import Gtk
 
 from Base_Functions import GUI_GTK_final as guib
 from Base_Functions import data_processor as datp
+from Base_Functions import classifier
+from Base_Functions import lang_script
 
 #import pref file
 
@@ -31,6 +33,26 @@ with open(prefs_path, 'r') as f:
     prefs = json.load(f)
 
 startcount=prefs['startcount']
+
+language_choice=prefs['lang_set']#language choice
+
+currency_var=prefs['currency_set']
+#-----------------------------------------Choose Dictionary and set currency-----------------------
+
+
+#initialiselang class
+
+langdict_class=lang_script.Language_Dictionary(currency_var)
+
+if language_choice=='eng':
+    langdict_used=langdict_class.lang_eng
+else:
+    langdict_used=langdict_class.lang_deu
+
+langdict_mfunc=langdict_used['Main_Func_vars']
+
+#-----------------------------------------Import Platform specific values---------------------
+
 
 if platform.system()=='Windows':
 
@@ -70,6 +92,7 @@ else:#mac
         home_dir=prefs['homedir']["mac"]
     #res_dir
     res_dir=prefs['resdir']["mac"]
+
 
 
 
@@ -168,7 +191,7 @@ class Main_Functions():
     
     def save_prefs(self):
         # save prefs when proceeding analysis or closing main window
-        #sace changes to prefs file
+        #save changes to prefs file
         if platform.system()=='Windows': #windows prefs  
 
             prefs['resdir']["win"]=self.res_dir
@@ -188,7 +211,8 @@ class Main_Functions():
             prefs['classdir']["mac"]=self.class_dir
 
         prefs['startcount']=startcount
-
+        prefs['lang_set']=language_choice
+        prefs['currency_set']=currency_var
 
         with open(prefs_path, 'w') as f:
             json.dump(prefs, f)
@@ -201,27 +225,27 @@ class Main_Functions():
         fileextension=5 #default value for data imports
         filetype="xls_analyse"#default value as only difference is csv raw data import
         if purpose=='raw_data_csv':
-            dialog = Gtk.FileChooserDialog(title="Csv-Dateien auswählen", parent=self.master,action=Gtk.FileChooserAction.OPEN)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_csv'][0], parent=self.master,action=Gtk.FileChooserAction.OPEN)
             filetype="csv_analyse"
             fileextension=4
             dialog.set_select_multiple(True)
         elif purpose=='raw_data_excel':
-            dialog = Gtk.FileChooserDialog(title="Excel-Dateien auswählen", parent=self.master,action=Gtk.FileChooserAction.OPEN)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_xlsx'][0], parent=self.master,action=Gtk.FileChooserAction.OPEN)
                                 
             dialog.set_select_multiple(True)
 
         elif purpose=="concat_longterm":
-            dialog = Gtk.FileChooserDialog(title="Excel-Dateien für Verknüfung mit csv-Dateien auswählen", parent=self.master,action=Gtk.FileChooserAction.OPEN)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_longterm'][0], parent=self.master,action=Gtk.FileChooserAction.OPEN)
             
         elif purpose=="cashbook":
-            dialog = Gtk.FileChooserDialog(title="Haushaltsbuch-Excel-Datei auswählen", parent=self.master,action=Gtk.FileChooserAction.OPEN)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_cashbook'][0], parent=self.master,action=Gtk.FileChooserAction.OPEN)
         
         #folder slection
         elif purpose=='classdir':
-            dialog = Gtk.FileChooserDialog(title="Ordner mit Zuordnungstabelle auswählen", parent=self.master,action=Gtk.FileChooserAction.SELECT_FOLDER)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_classdir'][0], parent=self.master,action=Gtk.FileChooserAction.SELECT_FOLDER)
         
         elif purpose=='resdir':
-            dialog = Gtk.FileChooserDialog(title="Ablageordner für Ergebnisse auswählen", parent=self.master,action=Gtk.FileChooserAction.SELECT_FOLDER)
+            dialog = Gtk.FileChooserDialog(title=langdict_mfunc['filechooser_resdir'][0], parent=self.master,action=Gtk.FileChooserAction.SELECT_FOLDER)
         
                #g
         #add relevant buttons
@@ -284,18 +308,18 @@ class Main_Functions():
         #add file extension names (csv,xlsx and all)
         if filetype=="csv_analyse":
             filter_csv = Gtk.FileFilter()
-            filter_csv.set_name("CSV Dateien")
+            filter_csv.set_name(langdict_mfunc['filechooser_filter1'][0])
             filter_csv.add_pattern('*.csv')
             dialog.add_filter(filter_csv)
 
         elif filetype=="xls_analyse":
             filter_xls = Gtk.FileFilter()
-            filter_xls.set_name("Excel Dateien")
+            filter_xls.set_name(langdict_mfunc['filechooser_filter2'][0])
             filter_xls.add_mime_type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             dialog.add_filter(filter_xls)
 
         filter_any = Gtk.FileFilter()
-        filter_any.set_name("Alle Dateien")
+        filter_any.set_name(langdict_mfunc['filechooser_filter3'][0])
         filter_any.add_pattern("*")
         dialog.add_filter(filter_any)
  
@@ -311,9 +335,9 @@ class Main_Functions():
         #do check up loops, if necessary raw data was provided by user
 
         if self.filenames==[]:
-            message.error(self.master,'Fehlende Rohdaten','Bitte wählen Sie mindestens eine Datei aus!')
+            message.error(self.master,langdict_mfunc['start_analysis_err1'][0],langdict_mfunc['start_analysis_err1'][1])
         elif (len(self.filenames)==1) and (self.choice_conc_xls==False and self.choice_conc==True):
-            message.warning(self.master,'Unplausible Auswahl','Es wurde nur eine Datei eingegeben, aber die Rohdaten-Zusammenführung gewählt.')
+            message.warning(self.master,langdict_mfunc['start_analysis_err2'][0],langdict_mfunc['start_analysis_err2'][1])
         else:
             #check for classtable being present. if not start classtable selection
             classtbl_success=self.set_classtable('import')
@@ -325,7 +349,7 @@ class Main_Functions():
                     pass #res dir was set by user
                 
                 #start account analysis class
-                self.accounts_data=datp.Accounts_Data(self.res_dir,self.import_classtable)
+                self.accounts_data=datp.Accounts_Data(self.res_dir,self.init_classifier,langdict_used['Data_Proc_vars'])
                 
                 #do data import check_up
                 import_list=self.dataimport_check('raw_data')
@@ -371,20 +395,18 @@ class Main_Functions():
                 successlist.append(item[0])
         
         if successlist==[]:
-            BOLD="\033[1m"  ##not used
-            errorcodes=', '.join([item for item in list(set(self.accounts_data.error_codes.values()))])
-            messagetext=f"Es konnte keine der ausgewählten Dateien verarbeitet werden!\n\nWählen Sie neue Dateien!\n\nFehlercode(s):\n\n({errorcodes})"
-            message.error(self.master,'Fehler beim Datenimport!',messagetext)   
+
+            errorcodes=', '.join([item for item in list(set(self.accounts_data.error_codes.values()))])            
+            message.error(self.master,langdict_mfunc['importcheck_err'][0],eval(f"f'''{langdict_mfunc['importcheck_err'][1]}'''"))   #eval function transforms f-string statements to be interpreted as f-strings
+        
         elif errorlist==[]:
 
-            messagetext='Alle Dateien wurden erfolgreich importiert!'
-            message.info(self.master,'Datenimport abgeschlossen!',messagetext) 
+            message.info(self.master,langdict_mfunc['importcheck_succall'][0],langdict_mfunc['importcheck_succall'][1]) 
         
         else:
             successlisttext=('• '+'\n• '.join([item for item in successlist]))
             errorlisttext=('• '+'\n• '.join([item for item in errorlist]))
-            messagetext=f'Es wurde:\n\n{successlisttext}\n\nerfolgreich eingelesen.\n\n\nFolgende Dateien konnten nicht verarbeitet werden:\n\n{errorlisttext}'
-            message.info(self.master,'Datenimport abgeschlossen!',messagetext) 
+            message.info(self.master,langdict_mfunc['importcheck_succpart'][0],eval(f"f'''{langdict_mfunc['importcheck_succpart'][1]}'''")) #eval function transforms f-string statements to be interpreted as f-strings
 
 
         return successlist
@@ -398,10 +420,10 @@ class Main_Functions():
         import_list=[]
 
         if purpose=='concat_longterm':
-            userchoice=message.question(self.master,'Zusätzliche Excel-Dateien einlesen','Bitte wählen Sie im folgenden Schritt die Excel-Dateien für die Zusammenführung mit den csv-Daten aus oder brechen ab.')
+            userchoice=message.question(self.master,langdict_mfunc['etraimport_longterm'][0],langdict_mfunc['etraimport_longterm'][1])
             
         elif purpose=='cashbook':
-            userchoice=message.question(self.master,'Haushaltsbuch einlesen','Bitte wählen Sie im folgenden Schritt die Excel-Dateien mit den Bargeldzahlungen aus oder brechen ab.')
+            userchoice=message.question(self.master,langdict_mfunc['etraimport_cashbook'][0],langdict_mfunc['etraimport_cashbook'][1])
 
 
         while userchoice:
@@ -437,23 +459,20 @@ class Main_Functions():
 
             if errorlist_csb==[]:  #cashbook data was found and connected for all imported account types
                 successlisttext=('• '+'\n• '.join([item for item in successlist_csb]))
-                messagetext=f'Zu folgenden importierten Rohdateien konnten passende Daten aus dem Haushaltsbuch hinzugefügt werden:\n\n{successlisttext}'
-                message.info(self.master,'Verknüpfung erfolgreich!',messagetext) 
+                message.info(self.master,langdict_mfunc['cashbookinfo_succ'][0],eval(f"f'''{langdict_mfunc['cashbookinfo_succ'][1]}'''")) #eval function transforms f-string statements to be interpreted as f-strings
             
             elif successlist_csb==[]: #cashbook data was not found and for any imported account type
-                errorlisttext=('• '+'\n• '.join([item for item in errorlist_csb]))
-                messagetext=f'Es konnten keine Daten aus dem Haushaltsbuch verknüpft werden.\nFolgende Codes weisen auf die Gründe hin:\n\n{errorlisttext}'
-                message.error(self.master,'Verknüpfung fehlgeschlagen',messagetext) 
+                errorlisttext=('• '+'\n• '.join([item for item in errorlist_csb]))                
+                message.error(self.master,langdict_mfunc['cashbookinfo_err'][0],eval(f"f'''{langdict_mfunc['cashbookinfo_err'][1]}'''")) #eval function transforms f-string statements to be interpreted as f-strings
                 
             else: #cashbook data was found and connected for some imported account types
                 successlisttext=('• '+'\n• '.join([item for item in successlist_csb]))
                 errorlisttext=('• '+'\n• '.join([item for item in errorlist_csb]))
-                messagetext=f'Die Verknüpfung von Daten aus dem Haushaltsbuch war für folgende Rohdateien erfolgreich:\n\n{successlisttext}!\n\n\nBei folgende Rohdateien schlug der Abgleich fehl:\n\n{errorlisttext}'
-                message.error(self.master,'Verknüpfung teilweise erfolgreich!',messagetext)
+                message.error(self.master,langdict_mfunc['cashbookinfo_succpart'][0],eval(f"f'''{langdict_mfunc['cashbookinfo_succpart'][1]}'''")) #eval function transforms f-string statements to be interpreted as f-strings
 
         else:
-            messagetext='Es wurden für die importierten Rohdaten keine korrespondierenden Daten im Haushaltsbuch gefunden.'
-            message.info(self.master,'Keine Verknüpfung erfolgt',messagetext) 
+
+            message.info(self.master,langdict_mfunc['cashbookinfo_nodata'][0],langdict_mfunc['cashbookinfo_nodata'][1]) 
 
 ######################################################### Classtable Edit #################################
 
@@ -463,10 +482,10 @@ class Main_Functions():
 
         if purpose=='import':
             try:
-                self.import_classtable=datp.Classifier(self.class_dir)
+                self.init_classifier=classifier.Classifier(self.class_dir,langdict_used['Classifier_vars'])
                 classtbl_success=True
             except:
-                message.error(self.master,'Zuordnungstabelle nicht gefunden!','Wählen Sie den neuen Ordner, in dem sich die Zuordnungstabelle befindet!')
+                message.error(self.master,langdict_mfunc['classtableimport_notexist'][0],langdict_mfunc['classtableimport_notexist'][1])
                 classtbl_success=False
         else:
             classtbl_success=False
@@ -475,15 +494,15 @@ class Main_Functions():
             self.filebrowser('classdir')
             if not self.class_dir=="":
                 try:
-                    self.import_classtable=datp.Classifier(self.class_dir)
-                    message.info(self.master,'Zuordnungstabelle erfolgreich gespeichert!','')
+                    self.init_classifier=classifier.Classifier(self.class_dir,langdict_used['Classifier_vars'])
+                    message.info(self.master,langdict_mfunc['classtableimport_succ'][0],langdict_mfunc['classtableimport_succ'][1])
         
 
                     #break loop    
                     classtbl_success=True
                     break
                 except:
-                    message.info(self.master,'Fehler beim Import','Im gewählten Ordner wurde keine Zuordnungstabelle gefunden.')
+                    message.info(self.master,langdict_mfunc['classtableimport_err'][0],langdict_mfunc['classtableimport_err'][1])
                     continue
             else:
                 classtbl_success=False
@@ -527,7 +546,7 @@ class Main_Functions():
                 self.excel_extraimport('concat_longterm')
 
             processed_files=list(self.accounts_data.folder_res.keys())
-            exclude_list=["Sparcents","Haushaltsbuch"] #exclude davecents and cashbooks from concat choice, as these can't be merged with existing data
+            exclude_list=[langdict_mfunc['excludelist'][0],langdict_mfunc['excludelist'][1]] #exclude davecents and cashbooks from concat choice, as these can't be merged with existing data
             for item in exclude_list:
                 if item in processed_files:
                     processed_files.remove(item) #get sublist without savecent/cashbook

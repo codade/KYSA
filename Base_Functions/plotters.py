@@ -1,27 +1,23 @@
 '''This file contains all necessary information for plotting relevant information.
-It's used by the respective 'Plot_processor'.py
-Plot function in Plot_processor hands over data, plottitle, printname and axadjustement for splitted plots
-axadjust is send as tuple. First position (axadjust[0] contains get or set condition, second position (axadjust [1] holds axvalue'''
-
+It's used by the respective 'Plot_processor'.py'''
 
 import warnings
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 
 import locale
-import matplotlib
-matplotlib.use("Agg")#necessary to avoid graphics crashing for plotting and simultaneous progressbar output
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt 
 import numpy as np
 import pandas as pd
 import platform 
 import seaborn as sns
 
 
-if platform.system()=='Linux':
-    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
-
+if platform.system()=='Windows':
+    locale.setlocale(locale.LC_ALL, 'German')
+elif platform.system()=='Darwin':
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf-8')
 else:
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
 
 
@@ -29,33 +25,17 @@ else:
 
 sns.set(style='whitegrid',font_scale=1.2) ##General setting for plots
 
-def boxplotter(plotinfo,axadjust,data_month):
-
-	daten,boxplottitle,printname=plotinfo
+def boxplotter(daten,data_month,boxplottitle,printname):
 	plt.figure(figsize=(15,20))
 	ax=sns.boxplot(data=daten,x="val",y="cat")
 	ax.set_ylabel('Kategorie',fontweight='bold')
 	ax.set_xlabel('Einzelumsätze',fontweight='bold',labelpad=10)
 	ax.set_title(boxplottitle+f"\n({data_month.loc[len(data_month)-1][0]} bis {data_month.loc[0][0]})", fontsize=18, fontweight='bold',pad=25)
 
-	#get axvalues for splitted plots
-	if axadjust[0]=='getval':
-		axvalue=ax.get_xlim()
-	elif axadjust[0]=='setval':
-		axvalue=axadjust[1]
-		ax.set(xlim=axvalue)
-		
-	else:
-		pass
-
-	#save plot
-	plt.savefig(printname,orientation='portrait',bbox_inches='tight')
+	plt.savefig(printname,orientation='portrait',quality=80,bbox_inches='tight')
 	plt.close()
-	return axvalue
 
-def violinplotter(plotinfo,axadjust,data_month):
-
-	daten,violintitle,printname=plotinfo
+def violinplotter(daten,data_month,violintitle,printname):
 	plt.figure(figsize=(17,20))
 	ax=sns.violinplot(data=daten,x="val",y="cat",scale='width',palette='rainbow')
 	ax=sns.swarmplot(data=daten,x="val",y="cat",color='black',size=6)
@@ -63,23 +43,10 @@ def violinplotter(plotinfo,axadjust,data_month):
 	ax.set_xlabel('Einzelumsätze',fontweight='bold')
 	ax.set_title(violintitle+f"\n({data_month.loc[len(data_month)-1][0]} bis {data_month.loc[0][0]})", fontsize=18, fontweight='bold',pad=25)
 
-	#get axvalues for splitted plots
-	if axadjust[0]=='getval':
-		axvalue=ax.get_xlim()	
-	elif axadjust[0]=='setval':
-		axvalue=axadjust[1]
-		ax.set(xlim=axvalue)
-	else:
-		pass
-
-	#save plot
-	plt.savefig(printname,orientation='portrait',bbox_inches='tight')
+	plt.savefig(printname,orientation='portrait',quality=80,bbox_inches='tight')
 	plt.close()
-	return axvalue
 
 def overviewplot(top3,top3_adj,data_month,plotinfo):
-	## overview plots are not splitted, therefore nor axadjust statements
-
 	title_main,title_left,title_right,printname=plotinfo
 	##Main plot configuration
 	fig, ax =plt.subplots(figsize=(14,13),nrows=2,ncols=2)
@@ -163,38 +130,20 @@ def overviewplot(top3,top3_adj,data_month,plotinfo):
 	 
 	sns.despine()
 	plt.subplots_adjust(left=0.15)
-	fig.savefig(printname,orientation='portrait',bbox_inches='tight')
+	fig.savefig(printname,orientation='portrait',quality=80,bbox_inches='tight')
 	plt.close(fig)
 
-def costplotter(plotinfo,axadjust,data_month):
+def costplotter(plotinfo,data_month):
 	costs,costtitle,printname=plotinfo
 	##Main plot configuration
 	fig, ax =plt.subplots(figsize=(15,15),nrows=2,sharex=True)
 	plt.suptitle(costtitle+f"\n({data_month.loc[len(data_month)-1][0]} bis {data_month.loc[0][0]})", fontsize=18, fontweight='bold',y=1.01)
 
-	## Definition Subplots
+	## Definition first Subplot
 	ax1 = sns.barplot(x="cat", y="val", data=costs,palette='rainbow',ax=ax[0]) ##Definition kind of plot & axis
-	ax2 = sns.barplot(x="cat", y="val_month", data=costs,palette='rainbow',ax=ax[1])
-
-	#axadjustement for costplotters has to be performed on two axes. Second position in tuple is stored as tuple itself, so that first position in subtuple is overall axvalue, second position holds
-	#the monthly plot axvalue
-
-	if axadjust[0]=='getval':
-		axvalue_1=ax1.get_ylim()		
-		axvalue_2=ax2.get_ylim()		
-	elif axadjust[0]=='setval':
-		axvalue_1=axadjust[1][0]
-		ax1.set(ylim=axvalue_1)
-		axvalue_2=axadjust[1][1]
-		ax2.set(ylim=axvalue_2)
-	else:
-		pass
-
-	#First subplot preparations for labeling
 	ax1.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))##Get y_height
 
-
-	##set labels and titles
+	 ##set labels and titles
 	ax1.set_xlabel("")
 	ax1.set_ylabel('Gesamtbeträge der Periode in €',fontweight='bold')
 
@@ -202,25 +151,24 @@ def costplotter(plotinfo,axadjust,data_month):
 	for i, v in enumerate(costs["val"].iteritems()):        # add values on top of the plot
 	    ax1.text(i ,v[1], f"{v[1]:,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."), color='black', va ='bottom', rotation=45)
 
-	#Second subplot preparations for labeling
-
+	## Definition second Subplot
+	ax2 = sns.barplot(x="cat", y="val_month", data=costs,palette='rainbow',ax=ax[1])
 	ax2.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))
-	##set labels and titles
+
 	ax2.set_xlabel("Kategorie",fontweight='bold',labelpad=10)
 	ax2.set_ylabel('Durschschnittliche Monatsbeträge in €',fontweight='bold')
 	for item in ax2.get_xticklabels(): item.set_rotation(90)
 	for i, v in enumerate(costs["val_month"].iteritems()):        
 	    ax2.text(i ,v[1], f"{v[1]:,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."), color='black', va ='bottom', rotation=45) # replace replaces thousand separator
 
-	#save plot
+	   
 	sns.despine()
 	plt.subplots_adjust(left=0.15)
-	fig.savefig(printname,orientation='portrait',bbox_inches='tight')
+	fig.savefig(printname,orientation='portrait',quality=80,bbox_inches='tight')
 	plt.close(fig)
-	return (axvalue_1,axvalue_2)
 
-def monthplotter(plotinfo,axadjust,data_month):
-	plot_data,monthtitle,printname=plotinfo
+def monthplotter(plotinfo,data_month):
+	monthtitle,printname=plotinfo
 
 	balance=data_month['val'].sum()/(data_month['month'].nunique())##get total balance 
 
@@ -233,19 +181,11 @@ def monthplotter(plotinfo,axadjust,data_month):
 
 	## Definition Plot
 	##get negative values red
-	def bar_color(plot_data,color1,color2):
-		return np.where(plot_data['val']>0,color1,color2).T
+	def bar_color(data_month,color1,color2):
+		return np.where(data_month['val']>0,color1,color2).T
 
 	#Plotting info
-	ax = sns.barplot(x="month", y="val", data=plot_data,palette=bar_color(plot_data,'darkgreen','red')) ##Definition kind of plot & axis
-
-	if axadjust[0]=='getval':
-		axvalue=ax.get_ylim()
-	elif axadjust[0]=='setval':
-		axvalue=axadjust[1]
-		ax.set(ylim=axvalue)
-		
-
+	ax = sns.barplot(x="month", y="val", data=data_month,palette=bar_color(data_month,'darkgreen','red')) ##Definition kind of plot & axis
 	ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))##Get y_height
 
 
@@ -258,27 +198,20 @@ def monthplotter(plotinfo,axadjust,data_month):
 	##set labels and titles
 	##set labels and titles
 	ax.xaxis.set_tick_params(pad=25)
-	ax.set_ylabel('Saldo je Monat in €',fontweight='bold')
+	ax.set_ylabel('Gesamtbeträge je Monat in €',fontweight='bold')
 	ax.set_xlabel('Monate',fontweight='bold',labelpad=10)
 	for item in ax.get_xticklabels(): item.set_rotation(90) #alter plotting of x valuesticks
-	for i, v in enumerate(plot_data["val"].iteritems()):# add values on top of the plot
+	for i, v in enumerate(data_month["val"].iteritems()):# add values on top of the plot
 		if v[1]>0:
 			ax.text(i ,v[1], f"{v[1]:,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."), color='black', va ='bottom', rotation=45)  # reformat thousand separator and decimal comma
 		else:
 			ax.text(i ,v[1], f"{v[1]:,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."), color='black',ha='right', va ='top',rotation=45)
-	
-
 	sns.despine()
-	
-	#save plot
-	plt.savefig(printname,orientation='portrait',bbox_inches='tight')
+	plt.savefig(printname,orientation='portrait',quality=80,bbox_inches='tight')
 	plt.close()
-	return axvalue
 
 
 def pieplotter(plotinfo_piechart,data_month):
-	#no axadjustment for piecharts necessary. 2% limitation is calculated in plot_process.py
-
     pie_data,plotinfo=plotinfo_piechart
     data_left,data_right=pie_data
     maintitle,left_title,right_title,printname=plotinfo
@@ -314,5 +247,5 @@ def pieplotter(plotinfo_piechart,data_month):
     ax2=axes[1].pie(pie_size_r, labels=pie_label_r, explode=exploder2, autopct=lambda p : f"{p:1.1f}%".replace(".", ","),shadow=True, startangle=75)# Equal aspect ratio ensures that pie is drawn as a circle
     axes[1].set_title(right_title,pad=40, fontweight='bold')
 
-    plt.savefig(printname,orientation='landscape',bbox_inches='tight')
+    plt.savefig(printname,orientation='landscape',quality=80,bbox_inches='tight')
     plt.close(fig)

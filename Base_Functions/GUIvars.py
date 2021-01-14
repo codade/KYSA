@@ -18,8 +18,11 @@ menuitem:hover {color:#fff;background-color:rgba(255, 255, 255, .1);}
 
 #-----------------------------------------XML Menu Info-----------------------
 
+######################################################### German Menu #################################
+
+
 #XML data for building main menu
-KYSA_XMLMenu = """
+KYSA_XMLMenu_deu = """
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <menu id="KYSA-Menu">
@@ -53,6 +56,10 @@ KYSA_XMLMenu = """
         <attribute name='label'>Ordner für\nErgebnisse</attribute>
         <attribute name='action'>win.resdir</attribute>
         </item>
+        <item>
+        <attribute name='label'>Einstellungen\nBenutzeroberfläche</attribute>
+        <attribute name='action'>win.uiset</attribute>
+        </item>
     </submenu>
     <section>
         <item>
@@ -70,11 +77,72 @@ KYSA_XMLMenu = """
 </interface>
 """
 
+
+######################################################### English Menu #################################
+
+
+#XML data for building main menu
+KYSA_XMLMenu_eng = """
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="KYSA-Menu">
+    
+    <submenu>
+        <attribute name='label'>Info</attribute>
+        <item>
+        <attribute name='label'>Changelog</attribute>
+        <attribute name='action'>win.changelog</attribute>
+        </item>
+        <item>
+        <attribute name='label'>Documentation</attribute>
+        <attribute name='action'>win.readme</attribute>
+        </item>
+        <item>
+        <attribute name='label'>License</attribute>
+        <attribute name='action'>win.license</attribute>
+        </item>
+        <item>
+        <attribute name='label'>About KYSA</attribute>
+        <attribute name='action'>win.about</attribute>
+        </item>
+    </submenu>
+    <submenu>
+        <attribute name='label'>Preferences</attribute>
+        <item>
+        <attribute name='label'>Set folder with\nclassification table</attribute>
+        <attribute name='action'>win.classtbl</attribute>
+        </item>
+        <item>
+        <attribute name='label'>Set folder for\nresults</attribute>
+        <attribute name='action'>win.resdir</attribute>
+        </item>
+        <item>
+        <attribute name='label'>UI Settings</attribute>
+        <attribute name='action'>win.uiset</attribute>
+        </item>
+    </submenu>
+    <section>
+        <item>
+            <attribute name="label">Help KYSA</attribute>
+            <attribute name="action">win.donate</attribute>
+        </item>
+    </section>
+    <section>
+        <item>
+            <attribute name="label">Quit</attribute>
+            <attribute name="action">win.quit</attribute>
+        </item>
+    </section>
+  </menu>
+</interface>
+"""
+
 #_-----------------------------Changelog Info----------------------------------
 
 
-versions=['2.04','2.03','2.02','2.01','1.03','1.02','1.01']
-changes={'2.04':['Popup notices','Revision of account identifier','Bugfix in splitted plots'],
+versions=['3.01','2.04','2.03','2.02','2.01','1.03','1.02','1.01']
+changes={'3.01':['Integration of UI settings','Establish english and german language support within the whole program','Integrate currency sign in all export files','Provide hardcoded classification info as backup'],
+             '2.04':['Popup notices','Revision of account identifier','Bugfix in splitted plots'],
              '2.03':['Completly refurbished GUI','Minor bugfixes','Storable directories for assignment table and results','Adaptions to manual','Integration of license file'],
              '2.02':['Integration of budget book evaluation','Improved plotting (sliced plots) for huge dataframes','New data processing structure','Introduction of prefs file','No double entries when concatting'],
              '2.01':['Introduction of error codes','Integration of progressbar','Completely revised process structure','Faster program startup on windows'],
