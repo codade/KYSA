@@ -14,7 +14,7 @@ from Base_Functions import GUI_GTK_final as guib
 from Base_Functions import plot_preprocessor as pltp
 
 
-
+langdict_main=guib.langdict_all['Main_File_vars']
 
 
 
@@ -99,13 +99,13 @@ class PlottingProcess():
             self.accounts_data.makefolder_excel() 
             self.continue_plot=True #process to next section
 
-            info_text=('Datenaufbereitung abgeschlossen','Die Daten werden nun visualisiert. Bitte haben Sie einen Moment Geduld!')
-            self.queue.put(('process_start',info_text)) #send process cintinuation message to progressbar process and wait until "success" is reported back
+            info_text=(langdict_main['data_prep_succ'][0],langdict_main['data_prep_succ'][1])
+            self.queue.put(('process_start',info_text)) #send process continuation message to progressbar process and wait until "success" is reported back
             time.sleep(0.5)
             self.queue_waiting()
-        #     print('start plotting')
+
         except:
-            info_text=('Datenaufbereitung abgebrochen','Der Excelexport konnte nicht abgeschlossen werden (Err04). Das Programm wird geschlossen.')
+            info_text=(langdict_main['data_prep_err'][0],langdict_main['data_prep_err'][1])
             self.continue_plot=False #stop programm
             self.queue.put(('process_error',info_text)) #send error message to progressbar and stop program (in porgressbar process)
  
@@ -121,7 +121,7 @@ class PlottingProcess():
             try:
                 self.plot_data.makeplotdata() 
             except:
-                info_text=('Datenvisualisierung abgebrochen','Die Diagrammvorverarbeitung konnte nicht abgeschlossen werden (Err05). Das Programm wird jetzt geschlossen')
+                info_text=(langdict_main['data_vis_err5'][0],langdict_main['data_vis_err5'][1])
                 self.queue.put(('process_error',info_text))  #send error message to progressbar and stop program (in porgressbar process)
 
                 break
@@ -130,11 +130,11 @@ class PlottingProcess():
 
             try:
                 self.plot_data.plotdata()
-                info_text=('Datenvisualisierung erfolgreich abgeschlossen',f'Die Ergebnisse wurden unter folgendem Ordner abgelegt:\n\n{self.accounts_data.res_dir}\n\nDas Programm wird jetzt geschlossen.')
+                info_text=(langdict_main['data_vis_succ'][0],eval(f"f'''{langdict_main['data_vis_succ'][1]}'''")) #eval function transforms f-string statements to be interpreted as f-strings
                 self.queue.put(('process_end',info_text))  #send successful data analysis message to progressbar and end program (in porgressbar process)
 
             except:
-                info_text=('Datenvisualisierung abgebrochen','Diagramme konnten nicht erstellt werden (Err06). Das Programm wird jetzt geschlossen')
+                info_text=(langdict_main['data_vis_err6'][0],langdict_main['data_vis_err6'][1])
                 self.queue.put(('process_error',info_text)) #send error message to progressbar and stop program (in porgressbar process)
             break
 
