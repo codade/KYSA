@@ -9,7 +9,7 @@ Since Version 2.04 a new feature is implemented to link csv-data to manually rec
 Future work will include account data saving and machine learning. If you wish to help me, please give me a message. Any help is appreciated! I'm collecting account raw data csv-files for integration in future releases via a Nextcloud upload: https://krezdorn.next-cloud.org/index.php/s/zkB5Ro5GHjRdxi4.
 If you upload you csv-file, please make sure to delete any personal information (account number, names, transactions etc.)
 
-Stable Windows executeable is available at: digital-souveraenitaet.de/kysa-know-your-Spendings (German version) or digital-souveraenitaet.de/kysa-know-your-spendings-english (English version)  
+Stable Windows executeable is available at: https://digital-souveraenitaet.de/kysa-know-your-Spendings (German version) or https://digital-souveraenitaet.de/kysa-know-your-spendings-english (English version)  
 Donations welcome via: liberapay.com/Waldbader
 
 ## Some Screenshots
