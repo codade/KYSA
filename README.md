@@ -15,9 +15,9 @@ Donations welcome via: liberapay.com/Waldbader
 ## Some Screenshots
 <p align="center">
 
- <img src="https://waldbadentutgut.de/wp-content/uploads/2021/01/KYSA_Mainv3-05_eng.png" width=25% title="Main Menu"/>
- <img src="https://waldbadentutgut.de/wp-content/uploads/2020/11/Violinplot.png" width=30% title="Transaction Overview as Violinplot"/>
- <img src="https://waldbadentutgut.de/wp-content/uploads/2021/01/Tortendiagramm-Hauptkostenbereiche.png" width=35% title="Main Cost breakdown\n(German Labels)"/>
+ <img src="https://digital-souveraenitaet.de/wp-content/uploads/2021/02/KYSA_Mainv3-05_eng.png" width=25% title="Main Menu"/>
+ <img src="https://digital-souveraenitaet.de/wp-content/uploads/2021/02/Violinplot.png" width=30% title="Transaction Overview as Violinplot"/>
+ <img src="https://digital-souveraenitaet.de/wp-content/uploads/2021/02/Tortendiagramm-Hauptkostenbereiche.png" width=35% title="Main Cost breakdown\n(German Labels)"/>
  
 </p>
 
