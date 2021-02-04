@@ -62,7 +62,7 @@ if platform.system()=='Windows':
         home_dir=prefs['homedir']["win"]
     #classdir
     if prefs['classdir']["win"]=='':
-        class_dir=os.getcwd()
+        class_dir=os.getcwd()++'\\Excel-Tables'
     else:
         class_dir=prefs['classdir']["win"]
 
@@ -71,7 +71,7 @@ if platform.system()=='Windows':
 elif platform.system()=='Linux':
     #import prefs files
     if prefs['classdir']["lin"]=='':
-        class_dir=os.getcwd()
+        class_dir=os.getcwd()+'/Excel-Tables'
     else:
         class_dir=prefs['classdir']["lin"]
     if prefs['homedir']["lin"]=='':
@@ -83,7 +83,7 @@ elif platform.system()=='Linux':
 
 else:#mac
     if prefs['classdir']["mac"]=='':
-        class_dir=os.getcwd()
+        class_dir=os.getcwd()+'/Excel-Tables'
     else:
         class_dir=prefs['classdir']["mac"]
     if prefs['homedir']["mac"]=='':
