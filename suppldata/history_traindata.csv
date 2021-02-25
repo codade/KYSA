@@ -1,0 +1,104 @@
+scan text;cat
+Übertrag/ Überweisung Auftraggeber: Buchungstext: Lohn/Gehalt ;"Lohn / Gehalt"
+Übertrag/ Überweisung Auftraggeber: Finanzamt;"Steuern &
+Abgaben"
+Kreditkartenumsatz Einzahlung;"Kreditkarten-
+übertrag"
+Umbuchung KREDITKARTEN GELDANLAGE ||VISA-RUECKUEBERWEISUNG UEBER INTERNETBANKING VOM;"Kreditkarten-
+übertrag"
+Abschluss UEBERTRG.SALDO ALTE KARTE;"Kreditkarten-
+abrechnung"
+Visa-Kartenabrechnung SUMME MONATSABRECHNUNG VISA ;"Kreditkarten-
+abrechnung"
+Guthabenübertrag UEBERTRAG AUF VISA-KARTE ;"Kreditkarten-
+übertrag"
+Gutschrift STADTWERKE || || ;"Strom"
+Übertrag/ Überweisung Auftraggeber: Buchungstext: Dienstreise;"Lohn / Gehalt"
+Gutschrift BK-ABRECHNUNG GUTSCHRIFT  || ;"Miete inkl.
+Nebenkosten"
+Gutschrift BK Abrechnung vom || ;"Miete inkl.
+Nebenkosten"
+Übertrag/ Überweisung Auftraggeber: DB Vertrieb GmbHBuchungstext: Fahrschein Ref. ;"Bahnfahrten
+ohne S-Bahn"
+Umbuchung DEUTSCHE KREDITBANK AG || ERSTATTUNG AUSLANDSEINSATZENTGELT FUER VISA ;"Kreditkarten-
+übertrag"
+Steuerverrechnung Ref.;"Steuern &
+Abgaben"
+Kartenzahlung/-abrechnung HabenzinsenZ ;"Zinsen"
+Umbuchung Zinsen || ;"Zinsen"
+Kreditkartenumsatz HabenzinsenZ;"Zinsen"
+Umbuchung Kapitalertrag- steuer ;"Steuern &
+Abgaben"
+Wechselgeld-Sparen WECHSELGELD-SPARBETRAG ;"Kreditkarten-
+übertrag"
+Kartenzahlung/-abrechnung Netto Marken-Discount;"Supermarkt"
+Lastschrift / Belastung Auftraggeber: S-Bahn-Berlin GmbHBuchungstext: Kartenzahlung S Bahn;"Nahverkehr"
+Lastschrift / Belastung Auftraggeber: DB Vertrieb GmbHBuchungstext: DB AUTOMAT///DE ;"Bahnfahrten
+ohne S-Bahn"
+Kartenzahlung/-abrechnung EDEKA ;"Supermarkt"
+Auslandsentgelt 1.75 PROZ.AUSLANDSENTGELT ;"Kreditkarten-
+übertrag"
+Kartenzahlung/-abrechnung DANKE, IHR LIDL;"Supermarkt"
+Lastschrift Stadtwerke||;"Strom"
+Lastschrift / Belastung Auftraggeber: DB Vertrieb GmbH Buchungstext: Fahrschein Ref. ;"Bahnfahrten
+ohne S-Bahn"
+Kartenzahlung/-abrechnung DB AUTOMAT///DE / DB Vertrieb GmbH |||| DE43120800004084300300;"Bahnfahrten
+ohne S-Bahn"
+Kartenzahlung/-abrechnung BERLINER VERKEHRSBETRIEBE (BVG)//BERLIN/DE / BVG AUTOMAT  || ;"Nahverkehr"
+Kartenzahlung/-abrechnung DM FIL. DM DROGERIEMARKT SAGT DANKE ||  || DE88600501017402099997;"Drogerie"
+Lastschrift / Belastung Auftraggeber: Buchungstext: Kd-Nr.:,Rg-Nr.:,Mehr Infos unter:Ihre Mobilfunkr echnung. Ref. ;"Mobilfunk"
+Kartenzahlung/-abrechnung S Bahn//BERLIN /DE / S-Bahn-Berlin GmbH || ;"Nahverkehr"
+Kartenzahlung/-abrechnung REWE SAGT DANKE. ;"Supermarkt"
+Lastschrift ROSSMANN VIELEN DANK || || DE41500400000600247148;"Drogerie"
+Kartenzahlung/-abrechnung Deutsche Post AG || ;"Büro- & Foto-
+Bedarf"
+Kartenzahlung/-abrechnung BIO COMPANY GmbH;"Supermarkt"
+Kartenzahlung/-abrechnung denns Biomarkt;"Supermarkt"
+Kartenzahlung/-abrechnung ALNATURA PRODUKTIONS- UND;"Supermarkt"
+Kartenzahlung/-abrechnung ALDI SAGT DANKE ;"Supermarkt"
+Kartenzahlung/-abrechnung KARSTADT LEBENSM. SAGT DANK;"Supermarkt"
+Kartenzahlung/-abrechnung Kaufland ;"Supermarkt"
+Lastschrift NETTO MARKEN-DISCOU. ;"Supermarkt"
+Kartenzahlung/-abrechnung OBI BAU- U. HEIMWER///DE / OBI SAGT DANKE ||  || DE71500400000600178805;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung TOOM BM SAGT DANKE ///DE / BM / ||  || DE93370400440502241300;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung XXXM221XXXMEDIA MAR///DE / MEDIA MARKT SAGT DANKE. || || DE38300500000001107713;"Elektronik, PC
+Handy"
+Kartenzahlung/-abrechnung XXXS012XXX SATURN E///DE / SATURN SAGT DANKE. || || DE38300500000001107713;"Elektronik, PC
+Handy"
+Lastschrift / Belastung Auftraggeber: THALIA-BUCHHANDLUNG Buchungstext: THALIA-BUCHHANDLUNG ///;"Fortbildung &
+Bücher"
+Kartenzahlung/-abrechnung HUGENDUBEL  FIL. GIR ///DE / || ;"Fortbildung &
+Bücher"
+Wertpapiere Buchungstext: WPKNR: ISIN: Ref. ;"Wertpapier-
+geschäfte"
+Kartenzahlung/-abrechnung OBI BAU- U. HEIMWER///DE / OBI SAGT DANKE || || DE71500400000600178805;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung TOOM BM SAGT DANKE //-/DE / BM / || || DE93370400440502241300;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung DB AUTOMAT//BERLIN /DE / DB Vertrieb GmbH || ;"Nahverkehr"
+Kartenzahlung/-abrechnung MVG AUTOMATEN//MUENCHEN/DE / MUE VERKEHRSGESELLS || ;"Nahverkehr"
+Übertrag/ Überweisung EmpfÃ€nger: Kto/IBAN: BLZ/BIC: Buchungstext: Ref. ;"Sonstige
+Ausgabe"
+Überweisung RUNDFUNK ARD, ZDF, DRADIO |||| DE10160800000012345600;"GEZ"
+Lastschrift HORNBACH || 270215132197585201200006100   || DE35500400000600247159;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung IKEA DEUTSCHLAND GMBH + CO///DE / IKEA  ||  || DE34500400000582510436;"Möbel & Wohn-
+bedarf"
+Lastschrift / Belastung Auftraggeber: OBI SAGT DANKEBuchungstext: Kartenzahlung OBI BAU- U. HEIMWER//;"Möbel & Wohn-
+bedarf"
+Visa-Umsatz DB BAHN A-NR INTERNET 000 ;"Bahnfahrten
+ohne S-Bahn"
+Kartenzahlung/-abrechnung TOOM BM SAGT DANKE ///DE / BM ||  || DE93370400440502241300;"Möbel & Wohn-
+bedarf"
+Kartenzahlung/-abrechnung HORNBACH || || DE35500400000600247159;"Möbel & Wohn-
+bedarf"
+Wertpapiere  || DEPOT       WERTP. ABRECHN.  WKN .ART KV               IHR FONDSSPARPLAN     PREIS    EURSTÃCK     || ;"Wertpapier-
+geschäfte"
+Dauerauftrag Miete || ;"Miete inkl.
+Nebenkosten"
+Lastschrift Miete || ;"Miete inkl.
+Nebenkosten"
+Übertrag/ Überweisung Auftraggeber: Kto/IBAN: BLZ/BIC:  Buchungstext: Ref. ;"Sonstige
+Einnahmen"
