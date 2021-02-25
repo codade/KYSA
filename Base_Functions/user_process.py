@@ -4,6 +4,8 @@ import os
 import sys
 import platform
 import json
+import pandas as pd
+from cryptography.fernet import Fernet
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -16,12 +18,22 @@ from Base_Functions import lang_script
 #import pref file
 
 prefs_name="prefs.json"
+encryped_traindata="history_traindata.csv"
+decryped_traindata="history_traindata_decrypted.csv"
+encrypted_longterm="longterm_data.csv"
 
-if not hasattr(sys, "frozen"):
-    prefs_path= os.path.join(os.getcwd(),"suppldata", prefs_name)
+if not hasattr(sys, "frozen"): #get local folder path for subfolder 'suppldata'
+    suppldata_path=os.path.join(os.getcwd(),"suppldata")
+    key_path=os.path.join(os.getcwd(),'history_data.key') #save key in main folder
 
 else:
-    prefs_path= os.path.join(sys.prefix,"suppldata", prefs_name)
+    suppldata_path=os.path.join(os.getcwd(),"suppldata")
+    key_path=os.path.join(os.getcwd(),'history_data.key') #save key in main folder
+
+prefs_path=os.path.join(suppldata_path,prefs_name)
+path_encryped_traindata=os.path.join(suppldata_path,encryped_traindata) # path to training data for machine classifier encrypted
+path_decryped_traindata=os.path.join(suppldata_path,decryped_traindata) # path to training data for machine classifier decrypted
+path_encryped_longterm=os.path.join(suppldata_path,encrypted_longterm) # path to saved longterm data encrypted
 
 
 
@@ -37,7 +49,7 @@ startcount=prefs['startcount']
 language_choice=prefs['lang_set']#language choice
 
 currency_var=prefs['currency_set']
-#-----------------------------------------Choose Dictionary and set currency-----------------------
+#-----------------------------------------Choose Dictionary set currency and integrate cryptokey-----------------------
 
 
 #initialiselang class
@@ -51,6 +63,18 @@ else:
 
 langdict_mfunc=langdict_used['Main_Func_vars']
 
+#Generate encryption key with first startup:
+if startcount==0:
+    history_key= Fernet.generate_key()
+    file = open(key_path, 'wb') #wb = write bytes
+    file.write(history_key)
+    file.close()
+else:
+    #load existing key
+    file = open(key_path, 'rb')
+    history_key = file.read()
+
+
 #-----------------------------------------Import Platform specific values---------------------
 
 
@@ -62,7 +86,7 @@ if platform.system()=='Windows':
         home_dir=prefs['homedir']["win"]
     #classdir
     if prefs['classdir']["win"]=='':
-        class_dir=os.getcwd()++'\\Excel-Tables'
+        class_dir=os.getcwd()
     else:
         class_dir=prefs['classdir']["win"]
 
@@ -71,7 +95,7 @@ if platform.system()=='Windows':
 elif platform.system()=='Linux':
     #import prefs files
     if prefs['classdir']["lin"]=='':
-        class_dir=os.getcwd()+'/Excel-Tables'
+        class_dir=os.getcwd()
     else:
         class_dir=prefs['classdir']["lin"]
     if prefs['homedir']["lin"]=='':
@@ -83,7 +107,7 @@ elif platform.system()=='Linux':
 
 else:#mac
     if prefs['classdir']["mac"]=='':
-        class_dir=os.getcwd()+'/Excel-Tables'
+        class_dir=os.getcwd()
     else:
         class_dir=prefs['classdir']["mac"]
     if prefs['homedir']["mac"]=='':
@@ -186,6 +210,7 @@ class Main_Functions():
         self.res_dir=res_dir
         self.master=master
         self.filenames=[] #start with empty list of imported raw data
+        self.decrypt_datasets()
 
 ######################################################### File Selection Part #################################
     
@@ -322,13 +347,60 @@ class Main_Functions():
         filter_any.set_name(langdict_mfunc['filechooser_filter3'][0])
         filter_any.add_pattern("*")
         dialog.add_filter(filter_any)
+
+
  
+######################################################### Transaction History Encryption Part #################################
+    
+    def decrypt_datasets(self):
+
+        #decrypt history data
+
+        with open(path_encryped_traindata, 'rb') as f: #open transaction history
+            encrypted_traindata = f.read()
+
+        if startcount==0:
+            decrypted_traindata = encrypted_traindata 
+
+        else:
+            #decrypt data
+            fernet = Fernet(history_key)
+            decrypted_traindata  = fernet.decrypt(encrypted_traindata )
+
+        #  Create csv of data to enable subsequent import 
+        with open(path_decryped_traindata, 'wb') as f:
+            f.write(decrypted_traindata) 
+
+        training_data=pd.read_csv(path_decryped_traindata,sep=';') #read decrypted history data
+        os.remove(path_decryped_traindata) #delete decrypted history data
+        #init machine learning classifier
+        self.init_machineclassifier=classifier.Machine_Classifier(training_data,language_choice) #initaliaze machine learning classifier with training data
+
+        self.longterm_data=pd.read_csv(path_encryped_longterm,sep=';') #import longterm data
+
+
+    def encrypt_datasets(self):
+        #save history data to temporary csv-file
+        self.init_machineclassifier.training_data.to_csv(path_decryped_traindata,index=False,sep=';')
+        self.longterm_data.to_csv(path_encryped_longterm,index=False,sep=';')
+        #  Open the generated file to encrypt it
+        with open(path_decryped_traindata, 'rb') as f:
+            decrypted_traindata = f.read()
+
+        os.remove(path_decryped_traindata) #delete decrypted history data
+
+        fernet = Fernet(history_key)
+        encrypted_traindata  = fernet.encrypt(decrypted_traindata )
+
+        # Write the encrypted data to csv
+        with open(path_encryped_traindata, 'wb') as f:
+            f.write(encrypted_traindata )
 
 ######################################################### Data Validation Part #################################
 
     def start_analysis(self,user_choice):
 
-        self.choice_dtype,self.choice_hol,self.choice_sav,self.choice_conc,self.choice_conc_xls,self.choice_cash=user_choice #tuple unpacking of user selection
+        self.choice_dtype,self.choice_hol,self.choice_sav,self.choice_conc,self.choice_cash,self.choice_longterm,self.choice_conc_xls=user_choice #tuple unpacking of user selection
 
         proceed=False #set continuation parameter
 
@@ -349,7 +421,7 @@ class Main_Functions():
                     pass #res dir was set by user
                 
                 #start account analysis class
-                self.accounts_data=datp.Accounts_Data(self.res_dir,self.init_classifier,langdict_used['Data_Proc_vars'])
+                self.accounts_data=datp.Accounts_Data(self.res_dir,self.classifier_process,langdict_used['Data_Proc_vars'])
                 
                 #do data import check_up
                 import_list=self.dataimport_check('raw_data')
@@ -482,7 +554,7 @@ class Main_Functions():
 
         if purpose=='import':
             try:
-                self.init_classifier=classifier.Classifier(self.class_dir,langdict_used['Classifier_vars'])
+                self.classifier_process=classifier.Classification_Process(self.class_dir,self.init_machineclassifier,langdict_used['Classifier_vars'])
                 classtbl_success=True
             except:
                 message.error(self.master,langdict_mfunc['classtableimport_notexist'][0],langdict_mfunc['classtableimport_notexist'][1])
@@ -494,7 +566,7 @@ class Main_Functions():
             self.filebrowser('classdir')
             if not self.class_dir=="":
                 try:
-                    self.init_classifier=classifier.Classifier(self.class_dir,langdict_used['Classifier_vars'])
+                    self.classifier_process=classifier.Classification_Process(self.class_dir,self.init_machineclassifier,langdict_used['Classifier_vars'])
                     message.info(self.master,langdict_mfunc['classtableimport_succ'][0],langdict_mfunc['classtableimport_succ'][1])
         
 
@@ -556,19 +628,28 @@ class Main_Functions():
             concat_basislist=processed_files+self.longterm_import  #longterm import list created in progress script
 
             #open concat window
-            concat_choice=guib.Concat_Window(concat_basislist)
-            Gtk.main()#makes process halt until concat window is closed
+            #check if concat_basislist has more than one entry:
+            if len(concat_basislist)>1:
+                concat_choice=guib.Concat_Window(concat_basislist)
+                Gtk.main()#makes process halt until concat window is closed
+                concat_choicelist=concat_choice.concat_list
+            else:
+                concat_choicelist=[] #skip concatting and create empty list
             
             progress.activity_mode=True #restart pulsation of progressbar
 
-            if not concat_choice.concat_list==[]:
-                self.accounts_data.concatter(concat_choice.concat_list) # do concatenation, if choice was entered correctly by user
+            if not concat_choicelist==[]:
+                self.accounts_data.concatter(concat_choicelist) # do concatenation, if choice was entered correctly by user
                    
         else:#no action needed
             pass
 
-        #start subprocess of data processing, making categorical and monthly grouping and sorting (data_processor.py) 
+        #create long-term data field and output evaluation if clicked
+        self.longterm_data=self.accounts_data.longterm_evaluate(self.longterm_data,self.choice_longterm)
+
+        #start subprocess of data processing, making categorical and monthly grouping and sorting (data_processor.py)
         self.accounts_data.month_cat_maker()
+        ##save changes in transaction history
         progress.close()
 
         

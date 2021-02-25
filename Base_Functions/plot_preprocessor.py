@@ -14,6 +14,8 @@ else:
     folder_sep='/'
 
 
+langdict_plotp=plotters.langdict_all['Plot_Proc_vars']
+
 class Plotters:
 
     def __init__(self,accounts_data):
@@ -39,226 +41,269 @@ class Plotters:
         
         ##Shuffle through items:
         for element_name in self.plot_elements:
-                        
+            
+            '''tuple unpacking cat data:
+            1. savecent and holiday cat_data doesn't hold a main_cat data set
+            2. Within the Cashbook dataset the main_cat variable holds the categorised account origins of cash payments
+            3. All other dataframes have both datasets
+            '''
+
+            subcat_data,main_cat_data=self.cat_data[element_name]
+            #create filepath
+            file_resultpath=self.folder_res[element_name]+self.folder_sep
+
+            #define local variable for indication if income plots should be calculated
+            plot_revenues=False
+
             ##create dataframe containing all income categories for further usage:
-            total_income=self.cat_data[element_name][(self.cat_data[element_name]['cat'].str.contains('Urlaub|Gesamtsaldo|Sonstiges|Abhebung|Bargeld')==False)&(self.cat_data[element_name]['val']>0)].copy()
+            
+#______________________________________________________________________Define basic costplots and monthplots for every dataframe ______________________________________
            
             ## prepare cost and month plots for accounts 
             # do specific adjustements for savecents, holidays and cashbook cat_data as these categorial elements are stored in a different manner than normal account cat_data
-            if element_name=='Sparcents':
+            if element_name==langdict_plotp['costplot_savecent'][0]:
                 #savecents cat data differs from other cat_data. Therefore separate handling is necessar
-                self.plotinfo_costs[element_name]=[(self.cat_data[element_name],f'Übersicht über die Herkunft und Summe der "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Übersicht Sparcents.png')]#cost plot data & info
+                self.plotinfo_costs[element_name]=[(subcat_data,eval(f"f'''{langdict_plotp['costplot_savecent'][1]}'''"),file_resultpath+langdict_plotp['costplot_savecent'][2])]#cost plot data & info
                 
                 #separate month data for possible plot splittung
                 month_plot=self.month_data[element_name].copy()
-                self.plotinfo_month[element_name]=[(month_plot,f'Absteigend sortierte Aufstellung der "{element_name}" je Monat',self.folder_res[element_name]+self.folder_sep+'Monatliche Sparcents.png')] #month plot data & info
+                self.plotinfo_month[element_name]=[(month_plot,eval(f"f'''{langdict_plotp['monthplot_savecent'][1]}'''"),file_resultpath+langdict_plotp['monthplot_savecent'][2])] #month plot data & info
             
-            elif element_name=='Urlaube':
+            elif element_name==langdict_plotp['costplot_holiday'][0]:
                 # specific actions necessary to specifically created "holiday" account
 
-                self.cat_data[element_name].loc[self.cat_data[element_name]['cat']=='Gesamtsaldo\nder Periode','cat']='Summe aller\nUrlaubsausgaben'#rename total amount to total holiday spendings in cat_data
-                cost_total=self.cat_data[element_name]
+                cost_total=subcat_data.copy()
                 cost_total[['val','val_month']]=cost_total[['val','val_month']].abs() #do sign reversal for better cost depicting 
                 cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True) #sorting descending
-                self.plotinfo_costs[element_name]=[(cost_total,f'Kostensummen der einzelnen Urlaube',self.folder_res[element_name]+self.folder_sep+'Übersicht Urlaubskosten.png')] #cost plot data & info
+                self.plotinfo_costs[element_name]=[(cost_total,langdict_plotp['costplot_holiday'][1],file_resultpath+langdict_plotp['costplot_holiday'][2])] #cost plot data & info
                 
                 #separate month data for possible plot splittung
                 month_plot=self.month_data[element_name].copy()
-                self.plotinfo_month[element_name]=[(month_plot,'Monatliche Aufstellung der Urlaubsausgaben',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung Urlaube.png')] #month plot data & info
+                self.plotinfo_month[element_name]=[(month_plot,langdict_plotp['monthplot_holiday'][1],file_resultpath+langdict_plotp['monthplot_holiday'][2])] #month plot data & info
 
-            elif element_name=='Haushaltsbuch':
+            elif element_name==langdict_plotp['costplot_cashbook1'][0]:
 
-                cashbook_cats=self.cat_data[element_name].copy()
-                cashbook_cats1=cashbook_cats[cashbook_cats.columns[[0,1,2]]] #first cat_dataset (grouped by cost categories)
-                cashbook_cats2=cashbook_cats[cashbook_cats.columns[[3,4,5]]] #second cat_dataset (grouped by account types)
-                cost_cat1=cashbook_cats1[cashbook_cats1['val'].isnull()==False] #delete null values
-                cost_cat2=cashbook_cats2[cashbook_cats2['val_2'].isnull()==False].copy() #delete null values
-                cost_cat2.columns=["cat","val","val_month"]
+                #plot cashbook expenditures by category
+                self.plotinfo_costs[element_name]=[(subcat_data,langdict_plotp['costplot_cashbook1'][1],file_resultpath+langdict_plotp['costplot_cashbook1'][2])] #cost plot data & info
+                #plot cashbook expenditures by account origin
 
-                self.plotinfo_costs[element_name]=[(cost_cat1,'Übersicht über die Bargeldzahlungen nach Kostenkategorien',self.folder_res[element_name]+self.folder_sep+'Übersicht Bargeldzahlungen.png')] #cost plot data & info
-                self.plotinfo_costs[element_name].append((cost_cat2,'Übersicht über die Bargeldabhebungen nach Kontokategorie',self.folder_res[element_name]+self.folder_sep+'Übersicht Bargeldabhebungen.png')) #cost plot data & info
+                self.plotinfo_costs[element_name].append((main_cat_data,langdict_plotp['costplot_cashbook2'][1],file_resultpath+langdict_plotp['costplot_cashbook2'][2])) #cost plot data & info
                 
                 #separate month data for possible plot splittung
                 month_plot=self.month_data[element_name].copy()
-                self.plotinfo_month[element_name]=[(month_plot,'Monatliche Aufstellung der Bargeldzahlungen',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung Bargeldzahlungen.png')] #month plot data & info
+                self.plotinfo_month[element_name]=[(month_plot,langdict_plotp['monthplot_cashbook'][1],file_resultpath+langdict_plotp['monthplot_cashbook'][2])] #month plot data & info
                 
-            else:##Cost & month plot Main Data
+            else:##Cost & month plot remaining data frames
+                total_revenues=subcat_data[(subcat_data['main cat'].str.contains(langdict_plotp['costplot_search'][0])==False)&(subcat_data['val']>0)].copy() #all main categories without total balance, holidays and cash payments
                 
-                
+                #set plot_revenues true if more than 2 income sources are found
+                if len(total_revenues)>2: 
+                    plot_revenues=True
+                else:
+                    pass
                 #NEW auto-adjust plottypes for excels and concats, if total income is empty
-                if (len(total_income)==0)&(self.plotting_choice[element_name]==""):
+                if (len(total_revenues)==0)&(self.plotting_choice[element_name]==""):
                     self.plotting_choice[element_name]='normal'
                 elif (self.plotting_choice[element_name]==""):
                     self.plotting_choice[element_name]='complete'
                 else:
                     pass
 
-                cost_total=self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(total_income['cat'].tolist()+['Gesamtsaldo\nder Periode'])==False].copy()
+                #plot overview of all cost categories
+                cost_total=subcat_data[(subcat_data['cat'].isin(total_revenues['cat'].tolist()+[langdict_plotp['costplot_basis_subcats'][0]])==False)&(subcat_data['val']<0)].copy()
                 cost_total[['val','val_month']]=cost_total[['val','val_month']].abs() #do sign reversal for better cost depicting
                 cost_total=cost_total.sort_values('val',ascending=False).reset_index(drop=True) #sorting descending
-                self.plotinfo_costs[element_name]=[(cost_total,f'Detaillierte Gesamtübersicht der Kostenkategorien für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Komplettübersicht Kostenkategorien.png')] #cost plot data & info
+                self.plotinfo_costs[element_name]=[(cost_total,eval(f"f'''{langdict_plotp['costplot_basis_subcats'][1]}'''"),file_resultpath+langdict_plotp['costplot_basis_subcats'][2])] #cost plot data & info
                 
+                #plot overview of main categories without income
+                main_cost_total=main_cat_data[(main_cat_data['main cat'].isin(total_revenues['main cat'].tolist()+[langdict_plotp['costplot_basis_subcats'][0]])==False)&(main_cat_data['val']<0)].copy()
+                main_cost_total[['val','val_month']]=main_cost_total[['val','val_month']].abs() #do sign reversal for better cost depicting
+                main_cost_total.columns=['cat','val','val_month'] #rename columns for plotting function
+                main_cost_total=main_cost_total.sort_values('val',ascending=False).reset_index(drop=True) #sorting descending
+                self.plotinfo_costs[element_name].append((main_cost_total,eval(f"f'''{langdict_plotp['costplot_basis_maincats'][1]}'''"),file_resultpath+langdict_plotp['costplot_basis_maincats'][2])) #cost plot data & info
+
                 #separate month data for possible plot splittung
                 month_plot=self.month_data[element_name].copy()
-                self.plotinfo_month[element_name]=[(month_plot,f'Aufstellung der Monatssalden für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Monatsaufstellung.png')] #month plot data & info
+                self.plotinfo_month[element_name]=[(month_plot,eval(f"f'''{langdict_plotp['monthplot_basis'][1]}'''"),file_resultpath+langdict_plotp['monthplot_basis'][2])] #month plot data & info
            
 
-            ##Prepare TOP3-Plots:
-            if 'o' in self.plotting_choice[element_name]:
-                
-                ##create Top3-List (depending on length of total_income list)
-                
-                if len(total_income)>3:
-                    self.top3[element_name]=total_income.loc[0:2].copy()
-                    self.top3[element_name]=self.top3[element_name].append(cost_total.loc[0:2],ignore_index=True)
-                else:
-                    self.top3[element_name]=total_income.copy()
-                    self.top3[element_name]=self.top3[element_name].append(cost_total.loc[0:2],ignore_index=True)
+#______________________________________________________________________Prepare specific plots ______________________________________ 
 
-                
-                ##Adjusted TOP3 without invest/get rent and total balance
-                top3_adj=self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Miete','Gesamtsaldo\nder Periode'])].copy()
-                ##make values positive for category rent
-                top3_adj.loc[top3_adj.cat=='Miete',['val','val_month']]=top3_adj.loc[top3_adj.cat=='Miete',['val','val_month']].abs()
+################################################################### pie plot for main categories and the 3 biggest main categories ##############################
+                #still inside else clause for main data frames
+                list_top_maincosts_nohol=list(main_cost_total['cat'].loc[0:2]) #get top3 main categories
+
+                if langdict_plotp['cost_piechart_adjust'][0] in list_top_maincosts_nohol: #if holiday category is in list get fourth biggest main category and drop holiday entry
+                    list_top_maincosts_nohol.append(main_cost_total['cat'].loc[3])
+                    list_top_maincosts_nohol.remove(langdict_plotp['cost_piechart_adjust'][0]) #remove holiday category
+                else:
+                    pass #nothing to do
+
+              
+                ## create category pie chart for main categories (top left) and three biggest main categories (top right to bottom right)
+                pieplot_costs_prepdata=[]
+                pieplot_costs_finaldata=[]
+                pieplot_costs_subplotinfo=[]
+                #Icreate data sets
+                for num in range(0,4):
+                    #1)get data sets
                
-                ##get net total of income and invest 
-                lohn_inv_val=total_income['val'].sum()+self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])]['val'].sum()
-                lohn_inv_valmonth=total_income['val_month'].sum()+self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])]['val_month'].sum()
+                    if num==0:
+                        # 1. main cat data
+                        costs_pie_prep_data=main_cost_total.copy() #get data
+                        
+                    else:
+                        # 2. cat data for three biggest main categories
+                        top3_maincatname=list_top_maincosts_nohol[num-1] #needed for subplot info as well
+                       
+
+                        costs_pie_prep_data=cost_total[cost_total['main cat']==top3_maincatname].copy() #get data of subcat data set depending on main cat name
+                        costs_pie_prep_data.drop(['main cat'],axis=1,inplace=True)#drop main cat column
+
+                        #delete line breaks in maincatname if present
+                        if '\n' in top3_maincatname:
+                            if '(-\n)' in top3_maincatname:
+                                top3_maincatname=''.join(top3_maincatname.split('-\n'))
+                            else:
+                                top3_maincatname=' '.join(top3_maincatname.split('\n'))
+                        else:
+                            pass
+
+                    
+                    pieplot_costs_prepdata.append(costs_pie_prep_data) #append it to preparation datalist
+
+                    #2) create percentages and group slices together if necessary
+                    pieplot_costs_prepdata[num]=pieplot_costs_prepdata[num].assign(ppt=(pieplot_costs_prepdata[num]['val']*100/pieplot_costs_prepdata[num]['val'].sum()).round(2)) #create percentages for every entry
+                    pieplot_costs_prepdata[num].drop(['val','val_month'],axis=1,inplace=True) #drop columns not needed anymore
+                    costs_pie_final=pieplot_costs_prepdata[num].loc[pieplot_costs_prepdata[num]['ppt']>=2.5].copy() #get slices with more than 2.5% 
+
+                    #group slices smaller than 2.5% together if those slices grouped together are bigger than 0
+                    if sum(pieplot_costs_prepdata[num].loc[pieplot_costs_prepdata[num]['ppt']<2.5]['ppt'])>0:
+                        #create slice named remaing stakes <2.5%
+                        costs_pie_final=costs_pie_final.append(pd.DataFrame([[langdict_plotp['piechart_2%name'][0],sum(pieplot_costs_prepdata[num].loc[pieplot_costs_prepdata[num]['ppt']<2.5]['ppt'])]],columns=list(pieplot_costs_prepdata[num].columns)),ignore_index=True)
+                    else:
+                        pass #nothing to do
+                    pieplot_costs_finaldata.append(costs_pie_final) #append final subdataset to dataset list
+                    
+                    #3) add subplotinfo
+                    pieplot_costs_subplotinfo.append(eval(f"f'''{langdict_plotp['costs_piechart_sub'][num]}'''"))
                 
-                #append net total of invest
-                top3_adj=top3_adj.append(pd.DataFrame([['Einkünfte inkl.\nInvestergebnis', lohn_inv_val,lohn_inv_valmonth]],columns=list(top3_adj.columns)),ignore_index=True)
-                
-                #get net total of remaining costs
-                cost_sum_val=abs(self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(total_income['cat'].tolist()+['Miete','Gesamtsaldo\nder Periode','Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])==False]['val'].sum())
-                cost_sum_valmonth=abs(self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(total_income['cat'].tolist()+['Miete','Gesamtsaldo\nder Periode','Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])==False]['val_month'].sum())
 
-                #append net total of remaining costs
-                top3_adj=top3_adj.append(pd.DataFrame([['Restliche Kosten-\npositionen',cost_sum_val,cost_sum_valmonth]],columns=list(top3_adj.columns)),ignore_index=True)
-                
-                #sort dataframe
-                top3_adj=top3_adj.sort_values(['val'],ascending=False).reset_index(drop=True)
-                self.top3_adj[element_name]=top3_adj
-            
-            else:#no action needed    
-                pass
-            ##Pie Chart holiday-->every account with 'a' or 't'
+                #II pack data and plotinfo and store it in dictionary
+                pieplot_costs_maininfo=(eval(f"f'''{langdict_plotp['costs_piechart_main'][0]}'''"),2,file_resultpath+langdict_plotp['costs_piechart_main'][1])
 
-            cost_hol=cost_total.loc[cost_total['cat'].str.contains('Urlaub')]
-            cost_nothol=cost_total.loc[cost_total['cat'].str.contains('Urlaub')==False]
-            
-            ##Adjust total cost with holidays grouped together
-            cost_total_adj=cost_nothol.append(pd.DataFrame([['Urlaube gesamt',sum(cost_hol['val']),sum(cost_hol['val_month'])]], columns=list(cost_nothol.columns)),ignore_index=True)
-            cost_total_adj=cost_total_adj.sort_values('val',ascending=False).reset_index(drop=True)
+                plotinfo_pieplot_costs=(pieplot_costs_maininfo,tuple(pieplot_costs_subplotinfo)) #transform subplotlist into tuple
+                self.plotinfo_piechart[element_name]=[(tuple(pieplot_costs_finaldata),plotinfo_pieplot_costs)] #transform final datalist into tuple
 
-            ##print cost categories with holidays grouped together
-            if (len(cost_hol.index)>1) and not (element_name=='Sparcents' or element_name=='Urlaube' or element_name=='Haushaltsbuch'):
-                cost_hol_group=cost_total_adj.copy()
-                self.plotinfo_costs[element_name].append((cost_hol_group,f'Übersicht der Kostenkategorien mit Urlauben (gesamt) für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht Kosten_Urlaube (gesamt).png'))
+################################################################### detailed income plots if more than 2 income categories present ##############################
 
-
-            ##Pie costs without holidays (right side)
-            cost_intermediate_hol=cost_nothol.assign(ppt=(cost_nothol['val']*100/cost_nothol['val'].sum()).round(2))
-            cost_intermediate_hol.drop(['val','val_month'],axis=1,inplace=True)
-            cost_pie_nothol=cost_intermediate_hol.loc[cost_intermediate_hol['ppt']>=2.0]
-
-            #Append sum of cost parts <2%, if sum is >0:
-            if sum(cost_intermediate_hol.loc[cost_intermediate_hol['ppt']<2.0]['ppt'])>0:
-                cost_pie_nothol=cost_pie_nothol.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate_hol.loc[cost_intermediate_hol['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate_hol.columns)),ignore_index=True)
-            else:
-                pass
-
-            ##Pie costs with holidays together (left side)
-            cost_intermediate2_hol=cost_total_adj.assign(ppt=(cost_total_adj['val']*100/cost_total_adj['val'].sum()).round(2))
-            cost_intermediate2_hol.drop(['val','val_month'],axis=1,inplace=True)
-            cost_pie_total_holadj=cost_intermediate2_hol.loc[cost_intermediate2_hol['ppt']>=2.0]
-
-            #Append sum of cost parts <2%, if sum is >0:
-            if sum(cost_intermediate2_hol.loc[cost_intermediate2_hol['ppt']<2.0]['ppt'])>0:
-                cost_pie_total_holadj=cost_pie_total_holadj.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate2_hol.loc[cost_intermediate2_hol['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate2_hol.columns)),ignore_index=True)
-            else:
-                pass
-
-            data_pie_hol=(cost_pie_total_holadj,cost_pie_nothol)
-            plotinfo_pieplot_hol=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Urlauben zusammengefasst','Anteilsübersicht ohne Urlaube',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Urlaub.png')
-            self.plotinfo_piechart[element_name]=[(data_pie_hol,plotinfo_pieplot_hol)]
-            
-            ##Adjust Cost & pie plots for invest
-            if len(self.cat_data[element_name][self.cat_data[element_name]['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])].index) > 0:
-                cost_hol_group=cost_total_adj.copy()
-                cost_notinv=cost_hol_group[cost_hol_group['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])==False].reset_index(drop=True)
-                self.plotinfo_costs[element_name].append((cost_notinv,f'Detaillierte Übersicht Kostenkategorien mit Urlauben (gesamt) ohne Investkosten für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Kostenübersicht_ohne Invest.png'))
-            
-                ##Get second pie plot, if invest is existing
-                
-                ##Pie costs without invest (right side)
-                cost_notinv_adj=cost_total_adj[cost_total_adj['cat'].isin(['Aktien-\ngeschäfte','ETFS / Wert-\npapiersparen'])==False].reset_index(drop=True) ##Get costs without invest with holidays together
-                cost_intermediate_inv=cost_notinv_adj.assign(ppt=(cost_notinv_adj['val']*100/cost_notinv_adj['val'].sum()).round(2))
-                cost_intermediate_inv.drop(['val','val_month'],axis=1,inplace=True)
-                cost_pie_notinv=cost_intermediate_inv.loc[cost_intermediate_inv['ppt']>=2.0]
-
-                #Append sum of cost parts <2%, if sum is >0:
-                if sum(cost_intermediate_inv.loc[cost_intermediate_inv['ppt']<2.0]['ppt'])>0:
-                    cost_pie_notinv=cost_pie_notinv.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate_inv.loc[cost_intermediate_inv['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate_inv.columns)),ignore_index=True)
-                else:
-                    pass
-
-                ##Pie costs with invest (left side)
-                cost_intermediate2_inv=cost_total_adj.assign(ppt=(cost_total_adj['val']*100/cost_total_adj['val'].sum()).round(2))
-                cost_intermediate2_inv.drop(['val','val_month'],axis=1,inplace=True)
-                cost_pie_total_invadj=cost_intermediate2_inv.loc[cost_intermediate2_inv['ppt']>=2.0]
-
-                #Append sum of cost parts <2%, if sum is >0:
-                if sum(cost_intermediate2_inv.loc[cost_intermediate2_inv['ppt']<2.0]['ppt'])>0:
-                    cost_pie_total_invadj=cost_pie_total_invadj.append(pd.DataFrame([['Restliche mit <2%',sum(cost_intermediate2_inv.loc[cost_intermediate2_inv['ppt']<2.0]['ppt'])]],columns=list(cost_intermediate2_inv.columns)),ignore_index=True)
-                else:
-                    pass
-
-                data_pie_inv=(cost_pie_total_invadj,cost_pie_notinv)
-                plotinfo_pieplot_inv=(f'Tortendiagramm Kostenkategorien >2% Anteil für "{element_name}"','Anteilsübersicht mit Invest','Anteilsübersicht ohne Invest',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Kostenanteile_Invest.png')
-                self.plotinfo_piechart[element_name].append((data_pie_inv,plotinfo_pieplot_inv))                             
-
-            else:#no action needed
-                pass
-            
             #plot detailed infos for multiple sources of income
-            if len(total_income)>3 and not (element_name=='Sparcents' or element_name=='Urlaube'or element_name=='Haushaltsbuch'):
+            if plot_revenues:
                 #plot income categories as cost plot
-                self.plotinfo_costs[element_name].append((total_income,f'Detaillierte Übersicht über die verschiedenen Einkommensquellen für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Einkommensübersicht.png'))
+                self.plotinfo_costs[element_name].append((total_revenues,eval(f"f'''{langdict_plotp['revenues_costplot'][0]}'''"),file_resultpath+langdict_plotp['revenues_costplot'][1]))
    
                 #Create pie plot for multiple sources of income (right without standard salary)
                 
-                ##Pie imcome without wages (right side)
-                income_nowage=total_income[total_income['cat'].isin(['Lohn','Gehalt'])==False].reset_index(drop=True) ##Get costs without invest with holidays together
+                ##Pie income without wages (right side)
+                income_nowage=total_revenues[total_revenues['cat'].str.contains(langdict_plotp['revenues_adjust_words1'][0])==False].reset_index(drop=True) ##Get income without wages/salaries
                 income_nowage=income_nowage.assign(ppt=(income_nowage['val']*100/income_nowage['val'].sum()).round(2))
-                income_nowage.drop(['val','val_month'],axis=1,inplace=True)
-                income_pie_nowage=income_nowage.loc[income_nowage['ppt']>=2.0].copy()
+                income_nowage.drop(['main cat','val','val_month'],axis=1,inplace=True)
+                income_pie_nowage=income_nowage.loc[income_nowage['ppt']>=2.5].copy()
 
                 #Append sum of cost parts <2%, if sum is >0:
-                if sum(income_nowage.loc[income_nowage['ppt']<2.0]['ppt'])>0:
-                    income_pie_nowage=income_pie_nowage.append(pd.DataFrame([['Restliche mit <2%',sum(income_nowage.loc[income_nowage['ppt']<2.0]['ppt'])]],columns=list(income_nowage.columns)),ignore_index=True)
+                if sum(income_nowage.loc[income_nowage['ppt']<2.5]['ppt'])>0:
+                    income_pie_nowage=income_pie_nowage.append(pd.DataFrame([[langdict_plotp['piechart_2%name'][0],sum(income_nowage.loc[income_nowage['ppt']<2.5]['ppt'])]],columns=list(income_nowage.columns)),ignore_index=True)
                 else:
                     pass
 
                 ##Pie costs with wages (left side)
-                income_wage=total_income.copy()
+                income_wage=total_revenues.copy()
                 income_wage=income_wage.assign(ppt=(income_wage['val']*100/income_wage['val'].sum()).round(2))
-                income_wage.drop(['val','val_month'],axis=1,inplace=True)
-                income_pie_wage=income_wage.loc[income_wage['ppt']>=2.0].copy()
+                income_wage.drop(['main cat','val','val_month'],axis=1,inplace=True)
+                income_pie_wage=income_wage.loc[income_wage['ppt']>=2.5].copy()
 
                 #Append sum of cost parts <2%, if sum is >0:
-                if sum(income_wage.loc[income_wage['ppt']<2.0]['ppt'])>0:
-                    income_pie_wage=income_pie_wage.append(pd.DataFrame([['Restliche mit <2%',sum(income_wage.loc[income_wage['ppt']<2.0]['ppt'])]],columns=list(income_wage.columns)),ignore_index=True)
+                if sum(income_wage.loc[income_wage['ppt']<2.5]['ppt'])>0:
+                    income_pie_wage=income_pie_wage.append(pd.DataFrame([[langdict_plotp['piechart_2%name'][0],sum(income_wage.loc[income_wage['ppt']<2.5]['ppt'])]],columns=list(income_wage.columns)),ignore_index=True)
                 else:
                     pass
 
-                data_pie_income=(income_pie_wage,income_pie_nowage)
-                plotinfo_pieplot_income=(f'Tortendiagramm Einkommensquellen >2% Anteil für "{element_name}"','Anteilsübersicht mit Lohn / Gehalt','Anteilsübersicht ohne Lohn / Gehalt',self.folder_res[element_name]+self.folder_sep+'Tortendiagramm Einkommensquellen.png')
-                self.plotinfo_piechart[element_name].append((data_pie_income,plotinfo_pieplot_income))   
+                pieplot_income_data=(income_pie_wage,income_pie_nowage,'','')
+                pieplot_income_maininfo=(eval(f"f'''{langdict_plotp['revenues_piechart_main'][0]}'''"),1,file_resultpath+langdict_plotp['revenues_piechart_main'][1])
                 
+                #create subplotinfo list
+                pieplot_income_subplotinfo=[]
+                for i in range(0,4):
+                    pieplot_income_subplotinfo.append(langdict_plotp['revenues_piechart_sub'][i])
+                plotinfo_pieplot_income=(pieplot_income_maininfo,tuple(pieplot_income_subplotinfo))
+                self.plotinfo_piechart[element_name].append((pieplot_income_data,plotinfo_pieplot_income)) 
                 
-                
+               
             else: # no action needed
                 pass
+
+
+################################################################### create overview plot with top3-income sources and main costs #################################
+
+
+            ##Prepare TOP3-Plots:
+            if self.plotting_choice[element_name]=='complete':
+                
+                ##create Top3-List (depending on length of total_revenues list) (left side of plot)
+
+
+                if plot_revenues:
+                    self.top3[element_name]=total_revenues.loc[0:2].copy()
+                else:
+                    self.top3[element_name]=total_revenues.copy()
+                #get top3-main cost categories
+                top3_maincosts=main_cost_total.loc[0:2].copy()
+                top3_maincosts.columns=['cat','val','val_month'] #rename columns to get it plotted
+                self.top3[element_name].drop('main cat',axis=1,inplace=True) #drop main cat axis for further processing
+                self.top3[element_name]=self.top3[element_name].append(top3_maincosts,ignore_index=True) #append both data frames
+
+                
+                ##Adjusted TOP3 without investments / get rent and total balance
+                list_searchwords=[langdict_plotp['overviewplot_searchwords'][0],langdict_plotp['overviewplot_searchwords'][1]]
+                top3_adj=main_cat_data[main_cat_data['main cat'].isin(list_searchwords)].copy()
+                
+                # ##make values positive for category living
+                 
+                #make values positive for category living
+                top3_adj.loc[top3_adj['main cat']==langdict_plotp['overviewplot_searchwords'][0],['val','val_month']]=top3_adj.loc[top3_adj['main cat']==langdict_plotp['overviewplot_searchwords'][0],['val','val_month']].abs()
+                
+                #get net total income
+                list_searchwords=list_searchwords+[langdict_plotp['overviewplot_searchwords'][2]]#add investments to searchword list
+                total_net_income=main_cat_data[(main_cat_data['main cat'].isin(list_searchwords)==False)&(main_cat_data['val']>0)].copy()
+                
+                ##get net total of income and invest 
+                income_inv_val=total_net_income['val'].sum()+main_cat_data[main_cat_data['main cat'].isin([langdict_plotp['overviewplot_searchwords'][2]])]['val'].sum()
+                income_inv_valmonth=total_net_income['val_month'].sum()+main_cat_data[main_cat_data['main cat'].isin([langdict_plotp['overviewplot_searchwords'][2]])]['val_month'].sum()
+                
+                
+                #append net total of invest
+                top3_adj=top3_adj.append(pd.DataFrame([[langdict_plotp['overviewplot_newnames'][0], income_inv_val,income_inv_valmonth]],columns=list(top3_adj.columns)),ignore_index=True)
+                
+                #get net total of remaining costs categories
+                remain_cat_neglist=list_searchwords+total_net_income['main cat'].tolist()
+
+                remain_costs_val=abs(main_cat_data[(main_cat_data['main cat'].isin(remain_cat_neglist)==False)]['val'].sum())
+                remain_costs_valmonth=abs(subcat_data[(subcat_data['main cat'].isin(remain_cat_neglist)==False)]['val_month'].sum())
+                
+                #append net total of remaining costs
+                top3_adj=top3_adj.append(pd.DataFrame([[langdict_plotp['overviewplot_newnames'][1],remain_costs_val,remain_costs_valmonth]],columns=list(top3_adj.columns)),ignore_index=True)
+                
+                #sort dataframe
+                top3_adj=top3_adj.sort_values(['val'],ascending=False).reset_index(drop=True)
+                top3_adj.columns=['cat','val','val_month'] #rename columns to get it plotted#
+
+                self.top3_adj[element_name]=top3_adj
+            
+            else:#no action needed    
+                pass
+
+
+
 
     
     def plotsplitter(self,element_name,plottype):
@@ -331,8 +376,8 @@ class Plotters:
 
                 for x in range (0,var3):
                     #do slicing and renaming
-                    new_data=data_old[slice_var[0]:slice_var[1]]
-                    new_title=title_old+" Teil "+name_var
+                    new_data=data_old[slice_var[0]:slice_var[1]] 
+                    new_title=title_old+langdict_plotp['boxsplit_partname'][0]+name_var
                     new_path=path_old[:-4]+"_"+name_var+".png"
 
                     #add subplot to plotting list
@@ -340,17 +385,17 @@ class Plotters:
 
                     if plottype=='vioplot' or plottype=='boxplot':
                         #adjust slicer for boxplots (every 22 categories a new plot)  
+        
                         if x+2<var3:
                             box_index_old=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]+1 #row number of last category + 1 row
-                            box_slicejump+=22 #box_slice_jump + 22 as every 22 categories a new plot is generated
+                            box_slicejump+=22
                             box_index_new=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]
                         
                         else:
                             box_index_old=data_old[data_old['cat']==box_cat_nums[box_slicejump]].index[-1]+1 #row number of last category + 1 row                       
                             box_index_new=data_old.index[-1]
 
-                                              
-                        slice_var=[box_index_old,box_index_new+1]#+1 for upper slice_var as the final line of the last category has to be included (range [x:y) goes up to y but not including y])
+                        slice_var=[box_index_old,box_index_new+1] #+1 for upper slice_var as the final line of the last category has to be included (range [x:y) goes up to y but not including y])
                     else:
                         #adjust slicer for month&costplot (every 18 entries a new plot)
                         slice_var = [x+18 for x in slice_var]
@@ -398,9 +443,8 @@ class Plotters:
         for element_name in self.plot_elements:
             #plot loop for every element in plot_elements including savecent, cashbook and holiday
             #every element has its own plot selection saved in plotting choice. Basic choice contains month plot and cost plot
-
             plot_selection=self.plotting_choice[element_name]
-                
+            file_resultpath=self.folder_res[element_name]+self.folder_sep
             ##Plot selection
             ###Plot basic choice (monthplot and costplot)
 
@@ -419,19 +463,19 @@ class Plotters:
                 box_vioplot_data=self.basis_data[element_name].copy()
                 box_vioplot_data=box_vioplot_data.sort_values(['cat']).reset_index()#sort by categories
                 #create plotinfo
-                self.plotinfo_boxplot[element_name]=[(box_vioplot_data,f'Boxplot aller Umsätze nach Kategorie für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Boxplot.png')]
+                self.plotinfo_boxplot[element_name]=[(box_vioplot_data,eval(f"f'''{langdict_plotp['boxplot_info'][0]}'''"),file_resultpath+langdict_plotp['boxplot_info'][1])]
                 self.plotsplitter(element_name,'boxplot')
 
                 #Violinplot
                 #use same dataframe as for boxplots
-                self.plotinfo_vioplot[element_name]=[(box_vioplot_data,f'Violinplot aller Umsätze nach Kategorie für "{element_name}"',self.folder_res[element_name]+self.folder_sep+'Violinplot.png')]
+                self.plotinfo_vioplot[element_name]=[(box_vioplot_data,eval(f"f'''{langdict_plotp['vioplot_info'][0]}'''"),file_resultpath+langdict_plotp['vioplot_info'][1])]
                 self.plotsplitter(element_name,'vioplot')
 
                 if plot_selection=='complete':
                     #complete plot includes top3 overview and pie charts
 
                     #"TOP3" / Overwiew Plot
-                    plotinfo_overview=(f'Überblicksübersicht Kosten und Einkünfte für "{element_name}"','Einkünfte und TOP-Kostenblöcke','Einkünfte inkl. Saldo Kapitalanlagen\n & Restliche Kostenpositionen',self.folder_res[element_name]+self.folder_sep+'Überblicksübersicht.png')
+                    plotinfo_overview=(eval(f"f'''{langdict_plotp['overviewplot_plotinfo'][0]}'''"),langdict_plotp['overviewplot_plotinfo'][1],langdict_plotp['overviewplot_plotinfo'][2],file_resultpath+langdict_plotp['overviewplot_plotinfo'][3])
                     plotters.overviewplot(self.top3[element_name],self.top3_adj[element_name],self.month_data[element_name],plotinfo_overview)
 
                     #Pie charts

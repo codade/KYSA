@@ -13,6 +13,8 @@ import os
 if platform.system()=='Windows':
     locale.setlocale(locale.LC_ALL, 'German')
 
+elif platform.system()=='Darwin':
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf-8')
 else:
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
@@ -36,27 +38,27 @@ dateparser_lowy = lambda x: dateadjuster(x,'lowy')
 def make_accinfo_dict():
     #list of account specific info necessary for standardization process (merging/dropping columns and classification)
 
-    comdirect_giro_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungstext","Umsatz in EUR"],('no',[]),('no',[],[]),'giro',('yes','Bargeld','Bargeld\nComdirect'),'complete')
+    comdirect_giro_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Buchungstext","Umsatz in EUR"],('no',[]),('no',[],[]),'giro','complete')
 
-    comdirect_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'credit',('no',"",""),'normal')
+    comdirect_credit_info=(["Buchungstag","Wertstellung (Valuta)","Vorgang","Referenz","Buchungstext","Umsatz in EUR"],('yes',[3,4]),('yes',3,[0,1,2,3,4]),'credit','normal')
 
-    dkb_giro_info=(['Buchungstag', 'Wertstellung', 'Buchungstext','Auftraggeber/Begünstigter', 'Verwendungszweck', 'Kontonummer', 'BLZ', 'Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz','Unnamed: 11'],('yes',[3,4,5]),('yes',[3,4,5,6,8,9,10,11],[0,1,2,4,3]),'giro',('yes','Kosten Lebens-\nhaltung','Einzahlungen'),'complete')
+    dkb_giro_info=(['Buchungstag', 'Wertstellung', 'Buchungstext','Auftraggeber/Begünstigter', 'Verwendungszweck', 'Kontonummer', 'BLZ', 'Betrag (EUR)','Gläubiger-ID','Mandatsreferenz','Kundenreferenz','Unnamed: 11'],('yes',[3,4,5]),('yes',[3,4,5,6,8,9,10,11],[0,1,2,4,3]),'giro','complete')
 
-    dkb_credit_info=(["Umsatz abgerechnet und nicht im Saldo enthalten","Wertstellung","Belegdatum","Beschreibung","Betrag (EUR)","Ursprünglicher Betrag"],('no',[]),('yes',[0,5],[0,1,2,3]),'credit',('no',"",""),'normal')
+    dkb_credit_info=(["Umsatz abgerechnet und nicht im Saldo enthalten","Wertstellung","Belegdatum","Beschreibung","Betrag (EUR)","Ursprünglicher Betrag"],('no',[]),('yes',[0,5],[0,1,2,3]),'credit','normal')
 
-    mlp_triodos_giro_info=(['Buchungstag', 'Valuta', 'Auftraggeber/Zahlungsempfänger', 'Empfänger/Zahlungspflichtiger', 'Konto-Nr.', 'IBAN', 'BLZ', 'BIC', 'Vorgang/Verwendungszweck', 'Kundenreferenz', 'Währung', 'Umsatz', 'Soll/Haben', 'Vorgang'],('yes',[3,8,9]),('yes',[2,3,4,5,6,7,8,9,10,12],[0,1,3,4,2]),'giro',('no',"",""),'complete')
+    mlp_triodos_giro_info=(['Buchungstag', 'Valuta', 'Auftraggeber/Zahlungsempfänger', 'Empfänger/Zahlungspflichtiger', 'Konto-Nr.', 'IBAN', 'BLZ', 'BIC', 'Vorgang/Verwendungszweck', 'Kundenreferenz', 'Währung', 'Umsatz', 'Soll/Haben', 'Vorgang'],('yes',[3,8,9]),('yes',[2,3,4,5,6,7,8,9,10,12],[0,1,3,4,2]),'giro','complete')
 
-    apobank_giro_info=(["Kontonummer","Buchungstag","Wertstellung","Auftraggeber/Empfänger","Textschlüssel","Buchungstext","VWZ1","VWZ2","VWZ3","VWZ4","VWZ5","VWZ6","VWZ7","VWZ8","VWZ9","VWZ10","VWZ11","VWZ12","VWZ13","VWZ14","Betrag","Kontostand","Währung"],('yes',[3,4,5,6,7,8,9,10,11]),('yes',[0,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22],[0,1,2,4,3]),'giro',('no',"",""),'complete')
+    apobank_giro_info=(["Kontonummer","Buchungstag","Wertstellung","Auftraggeber/Empfänger","Textschlüssel","Buchungstext","VWZ1","VWZ2","VWZ3","VWZ4","VWZ5","VWZ6","VWZ7","VWZ8","VWZ9","VWZ10","VWZ11","VWZ12","VWZ13","VWZ14","Betrag","Kontostand","Währung"],('yes',[3,4,5,6,7,8,9,10,11]),('yes',[0,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22],[0,1,2,4,3]),'giro','complete')
 
-    sparka_giro_info=(["Auftragskonto","Buchungstag","Valutadatum","Buchungstext","Verwendungszweck","Begünstigter/Zahlungspflichtiger","Kontonummer","BLZ","Betrag","Währung","Info"],('yes',[4,5,6]),('yes',[0,4,5,6,7,9,10],[0,1,2,4,3]),'giro',('no',"",""),'complete')
+    sparka_giro_info=(["Auftragskonto","Buchungstag","Valutadatum","Buchungstext","Verwendungszweck","Begünstigter/Zahlungspflichtiger","Kontonummer","BLZ","Betrag","Währung","Info"],('yes',[4,5,6]),('yes',[0,4,5,6,7,9,10],[0,1,2,4,3]),'giro','complete')
 
-    consors_giro_info = (['Buchung', 'Valuta', 'Sender / Empfänger', 'IBAN / Konto-Nr.', 'BIC / BLZ', 'Buchungstext', 'Verwendungszweck', 'Kategorie', 'Stichwörter', 'Umsatz geteilt', 'Betrag in EUR'],('yes', [2,6]),('yes', [2, 3, 4, 6, 7, 8, 9], [0, 1, 2, 4, 3]),'giro',('no', '', ''),['complete'])
+    consors_giro_info = (['Buchung', 'Valuta', 'Sender / Empfänger', 'IBAN / Konto-Nr.', 'BIC / BLZ', 'Buchungstext', 'Verwendungszweck', 'Kategorie', 'Stichwörter', 'Umsatz geteilt', 'Betrag in EUR'],('yes', [2,6]),('yes', [2, 3, 4, 6, 7, 8, 9], [0, 1, 2, 4, 3]),'giro','complete')
 
-    deutsche_giro_info=(['Buchungstag', 'Wert', 'Umsatzart', 'Begünstigter / Auftraggeber', 'Verwendungszweck', 'IBAN', 'BIC', 'Kundenreferenz', 'Mandatsreferenz ', 'Gläubiger ID', 'Fremde Gebühren', 'Betrag', 'Abweichender Empfänger', 'Anzahl der Aufträge', 'Anzahl der Schecks', 'Soll', 'Haben', 'Währung', 'Umsatz in EUR'],('yes', [3,4,5,7]),('yes', [ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [0, 1, 2, 4, 3]),'giro',('no', '', ''),'complete')
+    deutsche_giro_info=(['Buchungstag', 'Wert', 'Umsatzart', 'Begünstigter / Auftraggeber', 'Verwendungszweck', 'IBAN', 'BIC', 'Kundenreferenz', 'Mandatsreferenz ', 'Gläubiger ID', 'Fremde Gebühren', 'Betrag', 'Abweichender Empfänger', 'Anzahl der Aufträge', 'Anzahl der Schecks', 'Soll', 'Haben', 'Währung', 'Umsatz in EUR'],('yes', [3,4,5,7]),('yes', [ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [0, 1, 2, 4, 3]),'giro','complete')
 
-    commerz_giro_info=(["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"],('no', []),('yes', [ 5, 6, 7, 8, 9], [0, 1, 2, 3,4]),'giro',('no', '', ''),'complete')
+    commerz_giro_info=(["Buchungstag", "Wertstellung", "Umsatzart", "Buchungstext", "Betrag","Währung", "Auftraggeberkonto", "Bankleitzahl Auftraggeberkonto","IBAN Auftraggeberkonto", "Kategorie"],('no', []),('yes', [ 5, 6, 7, 8, 9], [0, 1, 2, 3,4]),'giro','complete')
 
-    accinfo_dictionary={'comdirect_giro':comdirect_giro_info,'comdirect_credit':comdirect_credit_info,'dkb_giro':dkb_giro_info,'dkb_credit':dkb_credit_info,'mlp_triodos_giro':mlp_triodos_giro_info,'apobank_giro':apobank_giro_info,'sparka_giro':sparka_giro_info, 'consors_giro':consors_giro_info, 'deutsche_giro':deutsche_giro_info, 'commerz_giro':commerz_giro_info}
+    accinfo_dictionary={'comdi_giro':comdirect_giro_info,'comdi_credit':comdirect_credit_info,'dkb_giro':dkb_giro_info,'dkb_credit':dkb_credit_info,'mlp_triodos_giro':mlp_triodos_giro_info,'apobank_giro':apobank_giro_info,'sparka_giro':sparka_giro_info, 'consors_giro':consors_giro_info, 'deutsche_giro':deutsche_giro_info, 'commerz_giro':commerz_giro_info}
     return accinfo_dictionary
 
 
@@ -79,12 +81,12 @@ def acc_type_tester(filepath):
                 pass
             #delete row with time1&time2 empty
             raw_data=raw_data.drop(raw_data[(raw_data['Buchungstag'].isna()==True)&(raw_data['Wertstellung (Valuta)'].isna()==True)].index)
-            return ('comdirect_giro',raw_data)
+            return ('comdi_giro',raw_data)
 
         elif len(raw_data.columns)==6:
             raw_data=pd.read_csv(filepath,sep=";",encoding="iso8859_15",skiprows=[0,1,2,3]+list(range(5,5+skipperint)),index_col=6,thousands='.',decimal=',',skipfooter=2,engine='python',parse_dates=[0,1],date_parser=dateparser_capy).reset_index(drop=True)
             raw_data["Referenz"]=raw_data[raw_data.columns[3]].apply(lambda item: "{}{}".format('Ref. ', item))
-            return ('comdirect_credit',raw_data)
+            return ('comdi_credit',raw_data)
 
         else:
             return ("other_acctype",raw_data)
@@ -200,6 +202,9 @@ def account_info_identifier(filepath,language_choice):
     if language_choice=='eng':
         if platform.system()=='Windows': #adjust locale if language choice is english
             locale.setlocale(locale.LC_ALL, 'English')
+        elif platform.system()=='Darwin':
+            locale.setlocale(locale.LC_ALL, 'en_US.utf-8')
+
         else:
             locale.setlocale(locale.LC_ALL, 'en_US.utf8')
     else:

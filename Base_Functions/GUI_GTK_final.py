@@ -38,19 +38,17 @@ license_name='KYSA_License_'+userproc.language_choice+'.html'
 kysa_image='KYSA-Progress_pic.png'
 copyright_pic='CRcode.png'
 
-if not hasattr(sys, "frozen"):
-    iconfilepath= os.path.join(os.getcwd(),"suppldata", icon_name)
-    readme_path= os.path.join(os.getcwd(),"suppldata", readme_name)
-    license_path= os.path.join(os.getcwd(),"suppldata", license_name)
-    kysaimagepath= os.path.join(os.getcwd(),"suppldata", kysa_image)
-    crpic_path=os.path.join(os.getcwd(),"suppldata", copyright_pic)#load to make sure png is present
+if not hasattr(sys, "frozen"): #get local folder path for subfolder 'suppldata'
+    suppldata_path=os.path.join(os.getcwd(),"suppldata")
 
 else:
-    iconfilepath = os.path.join(sys.prefix,"suppldata", icon_name)
-    readme_path= os.path.join(sys.prefix,"suppldata", readme_name)
-    license_path= os.path.join(sys.prefix,"suppldata", license_name)
-    kysaimagepath= os.path.join(sys.prefix,"suppldata", kysa_image)
-    crpic_path=os.path.join(sys.prefix,"suppldata", copyright_pic)#load to make sure png is present
+    suppldata_path=os.path.join(os.getcwd(),"suppldata")
+
+iconfilepath= os.path.join(suppldata_path, icon_name)
+readme_path= os.path.join(suppldata_path, readme_name)
+license_path= os.path.join(suppldata_path, license_name)
+kysaimagepath= os.path.join(suppldata_path, kysa_image)
+crpic_path=os.path.join(suppldata_path, copyright_pic)#load to make sure png is present
 
 #get language setting and import language dictionary
 open(crpic_path) #load to make sure png is present
@@ -175,11 +173,11 @@ class Main_Window(Gtk.ApplicationWindow):
 
         #language specific spacing between label and checkbox column
         if userproc.language_choice=='eng':
-            base_grid.set_column_spacing(105)
-            csv_adjustvar=57
+            base_grid.set_column_spacing(30)
+            csv_adjustvar=-26.5
         else:
-            base_grid.set_column_spacing(170)
-            csv_adjustvar=139.5
+            base_grid.set_column_spacing(40)
+            csv_adjustvar=-9.5
 
         base_grid.set_row_spacing(15)
         base_grid_cols=3
@@ -191,13 +189,12 @@ class Main_Window(Gtk.ApplicationWindow):
 
         #labels in grids
         grid_l_lst=[langdict_gui['mainwin_choice3'][0],langdict_gui['mainwin_choice4'][0],langdict_gui['mainwin_choice5'][0],
-                            langdict_gui['mainwin_choice6'][0],
-                            langdict_gui['mainwin_choice7'][0]]
+                            langdict_gui['mainwin_choice6'][0],langdict_gui['mainwin_choice7'][0],langdict_gui['mainwin_choice8'][0]]
         
         #checkboxes in grids
-        self.grid_chk_lst=[Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton()]
+        self.grid_chk_lst=[Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton(),Gtk.CheckButton()]
 
-        grids=[(base_grid,0,3),(csv_grid,3,len(grid_l_lst))] #tuple containing lower and upper limits
+        grids=[(base_grid,0,5),(csv_grid,5,len(grid_l_lst))] #tuple containing lower and upper limits
 
         #create booth grids with label and checkbox
         for item in grids:
@@ -286,16 +283,14 @@ class Main_Window(Gtk.ApplicationWindow):
             else:
                 userproc.startcount=random.randint(2,1000)
 
-        #deactivate csv-specific choice for xls-selection
+        #deactivate csv-specific choice if xls is selected
         if self.choice_dtype=='xls_analyse':
-            self.grid_chk_lst[3].set_active(False)
-            self.grid_chk_lst[4].set_active(False)
+            self.grid_chk_lst[5].set_active(False)
             self.choice_conc_xls=False
-            self.choice_cash=False
 
         else:
-            self.choice_conc_xls=self.grid_chk_lst[3].get_active()
-            self.choice_cash=self.grid_chk_lst[4].get_active()
+            self.choice_conc_xls=self.grid_chk_lst[5].get_active()
+            
 
 
         self.selection_counter+=1
@@ -326,8 +321,10 @@ class Main_Window(Gtk.ApplicationWindow):
         choice_hol=self.grid_chk_lst[0].get_active()
         choice_sav=self.grid_chk_lst[1].get_active()
         choice_conc=self.grid_chk_lst[2].get_active()
+        choice_cash=self.grid_chk_lst[3].get_active()
+        choice_longterm=self.grid_chk_lst[4].get_active()
 
-        user_choice=(self.choice_dtype,choice_hol,choice_sav,choice_conc,self.choice_conc_xls,self.choice_cash)
+        user_choice=(self.choice_dtype,choice_hol,choice_sav,choice_conc,choice_cash,choice_longterm,self.choice_conc_xls)
 
         self.proceed=self.mfunc.start_analysis(user_choice)#get information about import success
         
@@ -365,7 +362,7 @@ class Main_Window(Gtk.ApplicationWindow):
         aboutdialog.set_program_name("KYSA\nKnow Your Spendings Application")
         aboutdialog.set_copyright("\xa9 2020 Daniel Krezdorn")
         aboutdialog.set_authors(authors)
-        aboutdialog.set_version("v3.01")
+        aboutdialog.set_version(guivar.versions[0])
         aboutdialog.set_license_type(Gtk.License.BSD_3) #Changed to BSD 3 from BSD 2 (currently not suported by PyGobject version)
         aboutdialog.set_website("http://www.digital-souveraenitaet.de/kysa-")
         aboutdialog.set_website_label(langdict_gui['aboutwin_linktext'][0])
@@ -396,6 +393,8 @@ class Main_Window(Gtk.ApplicationWindow):
     def close_window(self,widget,origin):#used by menu entry quit and close event
         
         self.mfunc.save_prefs()#save preferences
+        #save changes to history train data to csv and encrypt it
+        self.mfunc.encrypt_datasets()
 
         if origin=='run_prog':
             self.close()#send close signal
@@ -566,7 +565,6 @@ class UISettings_Window(Gtk.Window):
         label_curr.set_markup(langdict_gui['setuiwin_choicelabel'][1])
         label_curr.set_halign(Gtk.Align.CENTER)
         hbox_grid.attach(label_curr, 1, 0, 1, 1)
-
         
 
         vbox_lang = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=6)

@@ -140,8 +140,10 @@ KYSA_XMLMenu_eng = """
 #_-----------------------------Changelog Info----------------------------------
 
 
-versions=['3.01','2.04','2.03','2.02','2.01','1.03','1.02','1.01']
-changes={'3.01':['Integration of UI settings','Establish english and german language support within the whole program','Integrate currency sign in all export files','Provide hardcoded classification info as backup'],
+versions=['3.03','3.02','3.01','2.04','2.03','2.02','2.01','1.03','1.02','1.01']
+changes={'3.03':['Introduction of main categories','Changed plots including main categories','Cashbook can be applied to excel-files as well'],
+             '3.02':['Integration of basic classification machine learning algorhythm','output account type','Password saved history of transaction and categories'],
+             '3.01':['Integration of UI settings','Establish english and german language support within the whole program','Integrate currency sign in all export files','Provide hardcoded classification info as backup'],
              '2.04':['Popup notices','Revision of account identifier','Bugfix in splitted plots'],
              '2.03':['Completly refurbished GUI','Minor bugfixes','Storable directories for assignment table and results','Adaptions to manual','Integration of license file'],
              '2.02':['Integration of budget book evaluation','Improved plotting (sliced plots) for huge dataframes','New data processing structure','Introduction of prefs file','No double entries when concatting'],
