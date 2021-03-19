@@ -6,7 +6,7 @@ Leightweight standalone program to analyse *csv-exported account transactions an
 
 From Version 2.04 on, it is possible to link csv-data to manually recorded cash transactions in a separate Excel list ("cashbook"). Furthermore preferences can now be saved for the next session.
 
-Future work will include account data saving and machine learning. If you wish to help me, please give me a message. Any help is appreciated! I'm collecting account raw data csv-files for integration in future releases via a Nextcloud upload: https://krezdorn.next-cloud.org/index.php/s/zkB5Ro5GHjRdxi4.
+Future work will include account data saving and machine learning. If you wish to help me, please give me a message. Any help is appreciated! I'm collecting account raw data csv-files for integration in future releases via <a href="mailto:kysa@digital-souveraenitaet.de">mail</a>.
 If you upload you csv-file, please make sure to delete any personal information (account number, names, transactions etc.)
 
 Stable Windows executeable is available at: https://digital-souveraenitaet.de/kysa-know-your-Spendings (German version) or https://digital-souveraenitaet.de/kysa-know-your-spendings-english (English version)  
