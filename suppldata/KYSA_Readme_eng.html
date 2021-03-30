@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 	<title>KYSA - Documentation</title>
-	<link rel="shortcut icon" href="KYSA-Icon_64.ico">
+	<link rel="shortcut icon" href="KYSA-Progress_pic.png">
 	<style type="text/css">
 		@page { size: 14.81cm 21.01cm; margin-left: 1.91cm; margin-right: 1.91cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
 		p { margin-bottom: 0.6cm; background: transparent; line-height: 115%; background: transparent; page-break-before: auto; page-break-after: auto }
@@ -23,13 +23,15 @@
 		a:visited { color: #800000; so-language: zxx; text-decoration: underline }
 	</style>
 </head>
-<body lang="de-DE" link="#000080" vlink="#800000" dir="ltr"><h1 class="western" align="center">
-<font face="Helvetica, sans-serif"><font size="6" style="font-size: 24pt">KYSA
--</font> </font>
-</h1>
-<h1 class="western" align="center"><font face="Helvetica, sans-serif">Know
-Your Spendings Application</font></h1>
-<p align="left" style="margin-top: 0.43cm; margin-bottom: 0.2cm; line-height: 100%; background: transparent">
+<body lang="de-DE" link="#000080" vlink="#800000" dir="ltr">
+<!-- Integrate icon picture -->
+<p align="center">
+<img src="KYSA-Progress_pic.png"  name="Icon" width="216" height="216" border="0"/>
+</p>
+<h1 class="western" align="center">
+<font face="Helvetica, sans-serif" size="6" style="font-size: 24pt">KYSA –</font></h1>
+
+<h1 class="western" align="center"><font face="Helvetica, sans-serif">Know Your Spendings Application</font></h1><p align="left" style="margin-top: 0.43cm; margin-bottom: 0.2cm; line-height: 100%; background: transparent">
 <br/>
 <br/>
 
@@ -43,11 +45,11 @@ different categories. The categories can be selected and adjusted
 with the help of the classification table.
 </font></p>
 <p align="justify" style="margin-top: 0.3cm; margin-bottom: 0.5cm; line-height: 115%">
-<font face="Helvetica, sans-serif">Currently, KYSA supports the
+<font face="Helvetica, sans-serif">Currently, with version 3.05, KYSA supports the
 import of csv files from the following banks:</font></p>
 <ol>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent; page-break-before: auto; page-break-after: auto">
-	<font face="Helvetica, sans-serif">apobank (Current Account)
+	<font face="Helvetica, sans-serif">Apobank (Current Account)
 	(beta/not validated)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Comdirect (Current Account&amp;Credit Card)</font></p>
@@ -60,11 +62,18 @@ import of csv files from the following banks:</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Deutsche Bank (Current Account)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
-	<font face="Helvetica, sans-serif">MLP Bank (Current Account) (beta/not validated)</font></p>
+	<font face="Helvetica, sans-serif">Genossenschaftsbank (Current Account)</font></p>
+	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
+	<font face="Helvetica, sans-serif">Hypovereinbank Bank (Current Account)</font></p>
+	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
+	<font face="Helvetica, sans-serif">MLP Banking (Current Account) (beta/not validated)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Sparksasse (Current Account)</font></p>
 	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
 	<font face="Helvetica, sans-serif">Triodos Bank (Current Account)</font></p>
+	<li><p style="margin-bottom: 0.2cm; line-height: 115%; background: transparent">
+	<font face="Helvetica, sans-serif">Volksbank (Current Account)</font></p>
+
 </ol>
 <p align="justify" style="margin-top: 0.7cm; margin-bottom: 0cm; line-height: 115%">
 <font face="Helvetica, sans-serif">The program reads the selected
@@ -78,9 +87,11 @@ does the program work?</h2>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">The user interface is quite
 intuitive.</font></p>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
-Pressing the menu icon in the header line opens up the main menu. There you will find information about the program, the possibilities of supporting via a donation and the preferences submenu. In the settings sub-menu, the folders for storing the results and lcoation of the classification table can be selected and stored. In addition, since version 3.01 it is possible to switch between English and German and to select different currency symbols for the display of results.</font></p>
+Pressing the menu icon in the header line opens up the main menu. There you will find information about the program, the possibilities of supporting via a donation and the preferences submenu. In the settings sub-menu, the folders for storing the results and lcoation of the classification table can be selected and stored. In addition, since version 3.01 it is possible to switch between English and German and to select different currency symbols for the display of results.
+From version 3.04 on, it is also possible to define accounts by name in the settings menu. If this setting is selected, the imported raw files can be assigned to an account and thus different accounts of the same bank can be processed separately
+(see also Why do I need account names?).</font></p>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
-In the first line of the main window, the data type for the raw data to be imported can be selected via the switch. You can import csv or Excel(xlsx) files (in KYSA format).</font></p>
+The main window is clearly arranged and offers the possibility to select and deselect the desired evaluation settings with a few clicks. The top line contains the switch button for selecting the data type of the raw data to be read in. You can import csv or Excel(xlsx) files (in KYSA format).</font></p>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
 Csv files must have been exported from one of the accounts listed above and can then be prepared and evaluated. If your account type is not in the above list, I can include it, if desired, in one of the next versions. The best way to do this is to upload the csv file of the respective account without any personal information (transactions/names/account numbers) via the installed Nextcloud-Upload. You'll find more information on that on the <a href="https://digital-souveraenitaet.de/kysa-know-your-spendings-english">KYSA website</a>.
 </font></p>
@@ -93,41 +104,40 @@ must therefore be available in the KYSA-specific format of a previously created
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">In addition to the choice between
 csv and xlsx, it is also possible to select whether vacations should
 be evaluated separately, whether Roundies (Rounded pennies)
-should be included or whether individual files should be merged (csv merge or add to a
-long-term analysis).</font></p>
+should be included or whether individual files should be merged (csv raw data can also be merged with existing Excel result files in KYSA-specific format.</font></p>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
-Since version v2.04, it is also possible to link a manually managed budget book (Excel format) with the cash withdrawals of the accounts.</font></p>
+Since version v2.04, it is also possible to link a manually managed budget book (Excel format) with the cash withdrawals of the accounts.
+If no account names are used, the bank account type must be entered in the budget book under "Account name" (e.g. Comdirect current account). Otherwise, the account name must be entered there.
+</font></p>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
+Since version v3.04, KYSA also stores all raw files ever imported under the the respective account name, if one has been selected. If no account names have been defined, the raw files are stored under the bank account type (if readable during the import process). The storage
+is encrypted in the KYSA folder. The main window offers the possibility to evaluate these stored data records, as well as to link them with new imported files and to output them.
+</font></p>
+<h2 class="western" align="left">How does the category assignment work?</h2>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Since version 3.04 classification works twofold. At first, each individual entry is checked for the search words defined by the user in the classification table (Search words tab). The folder in which the classification table is located can be specified the settings menu. The name of the classification table must not be changed. <br>
+If a search word is found in the booking text, this booking will be assigned to the corresponding category. If no matching search word is found, the first classification mechanism returns "unclear" as the category. <br><br>
+In a second step, all categories are then assigned to the respective main categories according to the assignment specification in the "Main categories" tab of the classification table. "Unclear" categories are assigned to the main category "category proposed by machine". The assignment of "unclear" categories must not be changed because it is necessary for the second classification mechanism.<br><br>
+In this second classification mechanism, the KYSA takes an attempt to sort the "unclear" categories using a learning algorithm based on past revenue categorizations. Since KYSA was developed to be data-sparsing, there is no server-based database to get transaction informations from. This means that the second classification mechanism is pretty "dumb" at the beginning. However, KYSA "learns" with each Excel file (in KYSA format) that is read in. <br>
+This in turn means that as a user, you should carefully review all categories under the main category "category proposed by machine" to ensure that KYSA learns the correct relationship between booking text&transaction and the resulting category. 
+Especially for the first KYSA uses it therefore makes sense to check the transactions carefully. Firstly to define keywords for recurring transactions in the classification table. Secondly, the correction of the proposed categories and the re-evaluation of this corrected Excel-file not only leads to more accurate evaluations and diagrams, but also helps that the proposed categories get better and better over time. <br><br>
+If you want to enforce fixed category assignments, you should define a unique search word in the classification table (search words tab) that is regularly found in the transactions texts. Since version v3.04, upper and lower case letters, punctuation and stopwords ("the", "and", "it"...) are irrelevant for the classification. <br><br>
+The category corresponding to the search word can be freely selected. However, you have to remember that not too many characters should be used, otherwise the diagrams will become confusing. However, the display of long category names in the diagram can be improved by entering them in the classification table with a forced line break (ALT+Enter) in the cell.<br> 
+Moreover, as of version v3.04, each new category should also be assigned to a main category (main categories table tab) in order to obtain meaningful results. If this assignment is not done, the new category will be sorted into the main category "unknown categories".  <br><br>
+If you want to use the function "Extract vacations", the word &quot;holiday&quot;,“vacation“ or „trip“ (note lower case writing) must appear
+in one of the categories in the classification table. In addition, the main categories "investments &amp; retirement prov.", "living &amp; big
+purchasess" and "vacations &amp; travel" are stored in the script for calculation steps and may not be removeda, as well as the line belonging to the main category "category proposed by machine". If categories are used that can be assigned to one of these main categories, you should link them in the main categorization logic (table tab main catories).</font></p>
 
-<h2 class="western" align="left">What do I need the classification
-table for?</h2>
-<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">The
-classification table is used to assign recurring entries to different categories.<br/>
-It is important for the program to work properly that you search for frequent keywords in
-the payment notes of your previous account statements. You can then define those keywords
-as search words in the classification table. The search text in the left column of the
-classification table must always be lower case and written without spaces. The
-categories can be chosen freely; however, do not use too many
-characters, otherwise the charts will become unclear. With long
-category names, a line break can be forced in the cell to improve the
-display in the diagram.</font></p>
-<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">If you want to use the function
-&quot;Evaluate Holidays separately&quot;, the word
-&quot;holiday&quot;,“vacation“
-or „trip“ (note lower case writing) must appear
-in one of the categories in the classification table. In addition,
-the categories &quot;Rent&quot;, &quot;Share transactions&quot;, &quot;ETF
-/ investment saving&quot;
-are stored in the script for calculation steps. So if there are
-entries in one of these categories, these names should also be used.</font></p>
+<h2 class="western" align="left">Why do I need account names?</h2>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">
+In the Settings menu, account names can be defined. This makes sense if you have several accounts at the same bank and want to evaluate and save them separately. With these account names you can assign entries in the budget book directly to an account. <br>
+If no account names are defined, KYSA saves new raw data automatically under the name of the corresponding bank account type. If you have several accounts with the same bank this means that these are summarized and can not be evaluated separately again. <br><br>
 
-<h2 class="western" align="left">Evaluate
-vacations separately</h2>
-<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Here, all categories containing
-the word &quot;vacation&quot;,“holiday“,“trip“ (case
-sensitive!) are additionally merged from all imported raw data into a
+If only one account is used at one bank, no account names need to be defined.
+<h2 class="western" align="left">Extract vacations to separate file</h2>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Here, all data entries assigned to the main category "vacations &amp; travel" are additionally merged from all imported (or saved) data files into a
 separate file. This file is also evaluated and presented in an Excel
 file and diagrams. This function is not applied to data that has been
-created by merging (otherwise duplication would occur).</font></p>
+created by merging.</font></p>
 
 <h2 class="western" align="left">Output Roundies (Rounded pennies)</h2>
 <p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Here, the rounding amounts of the
@@ -135,7 +145,7 @@ individual transactions are added from all account files to be
 imported and merged in a separate file. Afterwards the amount of savings from penny
 roundings is displayed according to the respective account they originate form and illustrated in a column diagram.
 Thus it is quickly visible, how much money could be taken quite simply from the account, if all transaction amounts were to be rounded to the full euro. This function is not applied to data that
-has been created through merging of separate files (otherwise duplication would occur).</font></p>
+has been created through merging of separate files.</font></p>
 
 <h2 class="western" align="left">Merge
 files </h2>
@@ -147,11 +157,9 @@ files into a separate file and then evaluate this file as a whole. If
 this option is selected, after a successful data import you will be
 asked which files are to be merged and what name the new file(s)
 should have. As a result, an Excel file and some diagrams for each
-new file are stored in the result folder with your chosen file name. If csv raw files are to be added to existing Excel files,
-the option &quot;Add to long-term analysis&quot; must be selected.</font></p>
+new file are stored in the result folder with your chosen file name. If csv raw files are to be linked with existing Excel files, this option must be selected separately.</font></p>
 <h3 class="western" style="margin-top: 0cm; margin-bottom: 0.6cm"><font size="3" style="font-size: 13pt">2)
-Combine csv data to be evaluated and add to existing Excel files
-(long-term analysis)</font></h3>
+Link csv data with existing Excel-results</font></h3>
 <p><font face="Helvetica, sans-serif">The result of the account
 evaluation is always an Excel file. If you want to add the evaluation
 results of csv raw files (e.g. over a different period of time) to
@@ -165,35 +173,32 @@ you can choose in a simple matrix which files should be merged and
 which name this new file(s) should have. As a result, a new
 Excel file and some diagrams for each new file are stored in the
 folder with the file name.</font></p>
+
+<h2 class="western" align="left">Cashbook</h2>
+<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Cash expenditures can be entered
+separately in the cashbook, so that they can be linked to the account data. This feature helps you to better understand your cash transactions, because your account data records only the cash withdrawals, not exactly what the money was spent on. <br><br>
+It is important for the analysis of the cashbook to  comply with the formatting and input requirements in the &quot;description&quot;
+worksheet. This is the only way to extract the relevant data and link it to the account data. For each imported (or saved) account, the program
+checks whether data exists for the cash category specified in the cashbook. If this is the case, those entries in the cashbook with a date lying within the considered time period of the respective account will be added to this dataframe. The added
+entries are automatically offset against the total amount of the specified cash category. The remaining amount then shows the cash expenditure
+not being described through the additional information in the cashbook.
+If data for the account type exists but KYSA wasn't able to link data points, a note
+with error codes (see chapter Error Codes) will be displayed.<br><br>
+Since version v3.04, you can be specify the account in the budget book by its account name (defined in the preferences menu). This ensures that only this account will be credited with the respective cash payment. If no account names are used, the bank account types can be used as fallback level (see description tab in cashbook.xlsx).
+</font></p>
+
+<h2 class="western">Evaluate and output stored long-term data</h2>
+<p><font face="Helvetica, sans-serif">From version v3.04 on, KYSA stores all of your imported data files with the respective account name.
+If no account names have been defined, the the bank account types will be used as account names. The data is stored encrypted and adjusted for double entries. With the function "Evaluate and output stored long-term data of the accounts" the stored data records can be evaluated and outputted. In doing so, a data record is prepared for each account name, which is also included in the selected vacation, roundies or cashbook analysis, and is outputted as "Long-term_account name". This feature is not selectable as long as no data has been saved.
+</font></p>
+
 <h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">Select
 files</h2>
 <p><font face="Helvetica, sans-serif">Here you can select the raw files
 (csv) or the subsequently modified Excel result files. Several files
 can be selected at once, but all files to be evaluated must be
 located in one folder.</font></p>
-<h2 class="western" align="left" style="margin-top: 0cm; margin-bottom: 0.3cm">Cashbook</h2>
-<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">Cash expenditures can be entered
-separately in the cashbook
-so that they can be linked to the account data. This feature
-helps you to better understand your cash transactions, because your
-account data records only the cash withdrawals, not exactly what the money was spent on. The feature can only be
-applied to csv-raw data as only through csv-files the exact account
-type can be detected.</font></p>
-<p align="justify" style="margin-bottom: 0.2cm; line-height: 115%"><font face="Helvetica, sans-serif">It is important for the analysis
-of the cashbook to
-comply with the formatting and input requirements in the &quot;description&quot;
-worksheet. This is the only way to extract the relevant data and link
-it to the account data. For each type of account read, the program
-checks whether data exists for the cash category specified in the
-cashbook.
-If this is the case, those entries in the cashbook with a date lying within the considered
-time period of the respective raw data will be added to the raw data. The added
-entries are automatically offset against the total amount of the
-specified cash category. The remaining amount then shows the cash expenditure
-not being described through the additional information in
-the cashbook.
-If data for the account type exists but is still not linked, a note
-with error codes (see chapter Error Codes) will be displayed.</font></p>
+
 <h2 class="western" align="left" style="margin-top: 0.6cm; margin-bottom: 0.3cm">Start
 the account evaluator</h2>
 <p><font face="Helvetica, sans-serif">Starts the evaluation process. If
@@ -221,12 +226,12 @@ following diagrams (depending on evaluation type):</font></h3>
 	income)</font></p>
 	<li><p><font face="Helvetica, sans-serif">Overview of income and costs with
 	the TOP3 items</font></p>
-	<li><p><font face="Helvetica, sans-serif">Pie chart for costs and income
+	<li><p><font face="Helvetica, sans-serif">Pie chart for costs (and breakdown for three biggest main categories, if existing) and income
 	(if more than two sources of income) </font>
 	</p>
 </ol>
 <p><font face="Helvetica, sans-serif">Credit card evaluations and, if
-selected, vacation and Roundies analyses only contain some of these
+selected, vacation and Roundies analyses only contain a subset of these
 diagrams.</font></p>
 <p><br/>
 <br/>
@@ -277,7 +282,7 @@ selected files. </font>
 	the account type has been changed. </font>
 	</p>
 	<br/>Check whether
-	your account is supported by KYSA. If the problem still occurs, a
+	your account is supported by KYSA. If the problem persists, a
 	solution can only be found by changing the program code.</font></p>
 	<li><p><font face="Helvetica, sans-serif">For xlsx files, this error code
 	means that the Excel file to be imported does not have the specified
@@ -299,10 +304,14 @@ selected files. </font>
 processing of the imported csv file.<br/>
 This may be due to a change in the
 bank-side coding of the csv content or to missing data components in
-the csv data set. If the problem persists with different exports of
+the csv data set. <br/>
+If the problem persists with different exports of
 the same account type, it can only be solved by adapting the program
 code.</font></p>
 <h3 class="western">Error code Err03:</h3>
+<p><font face="Helvetica, sans-serif">The selected csv file was recognized, but the transactions amounts are missing. 
+<br/>Check the file to be imported for these amounts or export the transactions again from your online banking account.</font></p>
+<h3 class="western">Error code Err04:</h3>
 <p><font face="Helvetica, sans-serif">There was a problem with the
 classification of the transaction
 information in the imported csv file.<br/>
@@ -312,42 +321,45 @@ table. Check if there are empty cells between assignments (search
 text and category) or any
 other unsupported characters.</br>The search text must be written
 small and without spaces. </font></p>
-<h3 class="western">Error code Err04:</h3>
-<p><font face="Helvetica, sans-serif">The processed data could not be
-exported. Check if write permission is granted for the folder where
-the result data is to be stored.</p>
+
 <h3 class="western">Error code Err05:</h3>
-<p><font face="Helvetica, sans-serif">The prepared raw data cannot be
-processed further for the creation of the diagrams. Information is
-missing in the data sets (e.g. no sales or no costs).<br/>
-Check the output result file for missing data or incorrectly assigned data (e.g. sales in wrong
-column).<br/>Problems of an allocation of csv-data under wrong columns
-can only be solved by changing the program code.</font></p>
-<h3 class="western">Error code Err06:</h3>
-<p><font face="Helvetica, sans-serif">The diagrams cannot be created.
-Check if you have write permission for the folder where the raw data
-is located. This error code can also occur when Excel files with
-incorrectly assigned contents are to be displayed in diagrams.</font></p>
-<h3 class="western">Error code Err07:</h3>
 <p><font face="Helvetica, sans-serif">This error only occurs if a
-cashbook
-is to be linked with imported csv raw data. The error code indicates
-that although data for the account type (Comdirect Current
+cashbook is to be linked to existing account transactions. <br/>
+The error code indicates
+that although data for the account (Comdirect Current
 Account...) was found in the cashbook,
 the cash category used in the cashbook could
-not be found in the categorized raw data. Make sure that the cash
+not be found in the categorized raw data. <br/>
+Make sure that the cash
 category name(s)
 used are identical in the cashbook
 and in the classification table; pay attention to upper and lower case writing and any spaces.</font></p>
-<h3 class="western">Error code Err08:</h3>
+<h3 class="western">Error code Err06:</h3>
 <p><font face="Helvetica, sans-serif">This error occurs only if a
-cashbook is to be linked to imported csv raw data. It indicates that despite
-the fact that the account and cash description are the same, no data
-has been taken from the cashbook.
+cashbook is to be linked to existing account transactions.<br/> 
+It indicates that despite
+the fact that the account and cash descriptions in cashbook and chosen account are matching, no data
+has been taken from the cashbook.<br/>
 This occurs especially when the period of relevant data in the
-cashbook does not fit into the period of the imported csv data. Check if the
+cashbook does not fit into the period of the chosen account. <br/>
+Check if the
 entries in the cashbook are sorted in descending order (latest cash
 payment in the top line). </font>
 </p>
+<h3 class="western">Error code Err07:</h3>
+<p><font face="Helvetica, sans-serif">The processed data could not be
+exported as Excel-files. Check whether you have write permission for the results folder used.</p>
+<h3 class="western">Error code Err08:</h3>
+<p><font face="Helvetica, sans-serif">The prepared raw data cannot be
+processed further for the creation of the diagrams. Information is
+missing in the datasets.<br/>
+Check the output result file for missing data or incorrectly assigned data (e.g. sales amounts in wrong
+column).<br/>Problems with inccorrectly allocated data from csv-files
+can only be solved by changing the program source code.</font></p>
+<h3 class="western">Error code Err09:</h3>
+<p><font face="Helvetica, sans-serif">The diagrams cannot be created.<br/>
+Check whether you have write permission for the results folder used.<br/>
+This error code can also occur when Excel files with
+incorrectly assigned contents are to be displayed in diagrams.</font></p>
 </body>
 </html>
