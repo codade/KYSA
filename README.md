@@ -10,7 +10,7 @@ Future work will include account data saving and machine learning. If you wish t
 If you upload you csv-file, please make sure to delete any personal information (account number, names, transactions etc.)
 
 Stable Windows executeable is available at: https://digital-souveraenitaet.de/kysa-know-your-Spendings (German version) or https://digital-souveraenitaet.de/kysa-know-your-spendings-english (English version)  
-Donations welcome via: liberapay.com/Waldbader
+Donations welcome via: https://liberapay.com/Waldbader
 
 ## Some Screenshots
 <p align="center">
