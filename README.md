@@ -6,6 +6,10 @@ Leightweight standalone program to analyse *csv-exported account transactions an
 
 From Version 2.04 on, it is possible to link csv-data to manually recorded cash transactions in a separate Excel list ("cashbook"). Furthermore preferences can now be saved for the next session.
 
+From version 3.05 on, a machine learning algorithm is established to help categorize transactions. Furthermore single exported account transaction files (csv) can be grouped together by account names and will be stored encrypted. The stored long-term data can be integrated into evaluations by selection and will then be exported to Excel files and diagrams.
+
+Mac executeable available from version 3.06 on. Future work might include a Linux file (Appimage). Currently i'm working on integrating a Dashboard based on Plotly Dash. If you wish to help me, let me know. Any help is appreciated!
+
 Future work will include account data saving and machine learning. If you wish to help me, please give me a message. Any help is appreciated! I'm collecting account raw data csv-files for integration in future releases via <a href="mailto:kysa@digital-souveraenitaet.de">mail</a>.
 If you upload you csv-file, please make sure to delete any personal information (account number, names, transactions etc.)
 
